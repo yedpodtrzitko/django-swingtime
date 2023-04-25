@@ -1,6 +1,6 @@
 from django.urls import re_path
 
-from swingtime import views
+from . import views
 
 urlpatterns = [
     re_path(r"^(?:calendar/)?$", views.today_view, name="swingtime-today"),

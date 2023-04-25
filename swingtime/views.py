@@ -1,16 +1,16 @@
 import calendar
 import itertools
 import logging
-from datetime import datetime, time, timedelta
+from datetime import datetime, timedelta
 
 from dateutil import parser
 from django import http
 from django.db import models
 from django.shortcuts import get_object_or_404, render
-from django.template.context import RequestContext
 
 from . import forms, utils
 from .conf import swingtime_settings
+from .forms import WEEKDAY_SHORT
 from .models import Event, Occurrence
 
 if swingtime_settings.CALENDAR_FIRST_WEEKDAY is not None:
@@ -304,7 +304,6 @@ def month_view(
     cal = calendar.monthcalendar(year, month)
     dtstart = datetime(year, month, 1)
     last_day = max(cal[-1])
-    dtend = datetime(year, month, last_day)
 
     # TODO Whether to include those occurrences that started in the previous
     # month but end in this month?
@@ -327,6 +326,7 @@ def month_view(
         "this_month": dtstart,
         "next_month": dtstart + timedelta(days=+last_day),
         "last_month": dtstart + timedelta(days=-1),
+        "week_days": list(WEEKDAY_SHORT.values()),
     }
 
     return render(request, template, data)

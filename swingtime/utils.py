@@ -4,9 +4,8 @@ Common features and functions for swingtime
 import calendar
 import itertools
 from collections import defaultdict
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, timedelta
 
-from dateutil import rrule
 from django.db.models.query import QuerySet
 from django.utils.safestring import mark_safe
 

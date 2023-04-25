@@ -1,24 +1,34 @@
 {% extends "base.html" %}
 {% block title %}Add Event{% endblock %}
+{% block head %}
+    {{ block.super }}
+    <script>
+        function showTab(wrapperNode, showNode) {
+            document.querySelectorAll(wrapperNode + ' .tab').forEach((node) => node.classList.add('hidden'));
+            document.querySelector(wrapperNode + ' ' + showNode).classList.remove('hidden');
+
+        }
+    </script>
+{% endblock head %}
 {% block content %}
-    <h3>Add Event</h3>
+    <h3 class="center block text-xl">Add Event</h3>
+
     {{ event_form.non_field_errors }}
     {{ recurring_form.non_field_errors }}
     {% if event_form.errors or recurrence_form.errors %}
-    <p class="form-errors">Please fix any errors.</p>
+        <p class="form-errors">Please fix any errors.</p>
     {% endif %}
-    <form method="post" action="">{% csrf_token %}
-    <table>
-        <tfoot>
-            <tr>
-                <td colspan="2"><input type="submit" value="Submit" /></td>
-            </tr>
-        </tfoot>
-        <tbody>
-        {% include "swingtime/event_form_part.html" %}
-        {% include "swingtime/recurring_form_part.html" %}
-        </tbody>
-    </table>
+    <form method="post" action="">
+        {% csrf_token %}
+        <table>
+            {{ event_form.as_table }}
+            {% include "swingtime/recurring_form_part.html" %}
+        </table>
+
+        <input class="border p-4 inline-block m-4 bg-blue-200 rounded"
+               type="submit"
+               value="Submit"
+        />
     </form>
 
 {% endblock %}

@@ -13,24 +13,35 @@ from . import utils
 from .conf import swingtime_settings
 from .models import *
 
-WEEKDAY_SHORT = (
-    (7, _("Sun")),
-    (1, _("Mon")),
-    (2, _("Tue")),
-    (3, _("Wed")),
-    (4, _("Thu")),
-    (5, _("Fri")),
-    (6, _("Sat")),
+
+def get_days_order(first_days: int, days):
+    return (days * 2)[first_days : first_days + 7]
+
+
+WEEKDAY_SHORT = get_days_order(
+    swingtime_settings.CALENDAR_FIRST_WEEKDAY,
+    [
+        (1, _("Mon")),
+        (2, _("Tue")),
+        (3, _("Wed")),
+        (4, _("Thu")),
+        (5, _("Fri")),
+        (6, _("Sat")),
+        (7, _("Sun")),
+    ],
 )
 
-WEEKDAY_LONG = (
-    (7, _("Sunday")),
-    (1, _("Monday")),
-    (2, _("Tuesday")),
-    (3, _("Wednesday")),
-    (4, _("Thursday")),
-    (5, _("Friday")),
-    (6, _("Saturday")),
+WEEKDAY_LONG = get_days_order(
+    swingtime_settings.CALENDAR_FIRST_WEEKDAY,
+    [
+        (1, _("Monday")),
+        (2, _("Tuesday")),
+        (3, _("Wednesday")),
+        (4, _("Thursday")),
+        (5, _("Friday")),
+        (6, _("Saturday")),
+        (7, _("Sunday")),
+    ],
 )
 
 MONTH_LONG = (
@@ -62,7 +73,6 @@ MONTH_SHORT = (
     (11, _("Nov")),
     (12, _("Dec")),
 )
-
 
 ORDINAL = (
     (1, _("first")),
@@ -284,7 +294,8 @@ class MultipleOccurrenceForm(forms.Form):
 
     def __init__(self, *args, **kws):
         super().__init__(*args, **kws)
-        dtstart = self.initial.get("dtstart", None)
+
+        dtstart = self.initial.get("dtstart")
         if dtstart:
             dtstart = dtstart.replace(
                 minute=((dtstart.minute // MINUTES_INTERVAL) * MINUTES_INTERVAL),
@@ -296,7 +307,7 @@ class MultipleOccurrenceForm(forms.Form):
             ordinal = dtstart.day // 7
             ordinal = "%d" % (-1 if ordinal > 3 else ordinal + 1,)
             midnight = datetime.combine(dtstart.date(), time(0, tzinfo=dtstart.tzinfo))
-            offset = (dtstart - midnight).seconds
+            offset = (dtstart - midnight).total_seconds()
 
             self.initial.setdefault("day", dtstart)
             self.initial.setdefault("week_days", "%d" % weekday)
@@ -365,7 +376,7 @@ class MultipleOccurrenceForm(forms.Form):
                 params["byweekday"] = day(ordinal)
 
         elif params["freq"] != rrule.DAILY:
-            raise NotImplementedError(_("Unknown interval rule " + params["freq"]))
+            raise NotImplementedError(_("Unknown interval rule %s" % params["freq"]))
 
         return params
 
