@@ -1,6 +1,7 @@
+import datetime
 import os
 import sys
-import datetime
+
 import django
 
 try:

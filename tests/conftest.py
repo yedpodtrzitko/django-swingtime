@@ -1,6 +1,8 @@
-import pytest
 from datetime import datetime
-from swingtime.models import EventType, Event, Occurrence
+
+import pytest
+
+from swingtime.models import Event, EventType, Occurrence
 
 
 @pytest.fixture

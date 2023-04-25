@@ -1,12 +1,12 @@
-from datetime import datetime, date, timedelta
-from dateutil import rrule
+from datetime import date, datetime, timedelta
 
-from django.utils.translation import gettext_lazy as _
+from dateutil import rrule
+from django.conf import settings
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.urls import reverse
-from django.conf import settings
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.utils.translation import gettext_lazy as _
 
 from .conf import swingtime_settings
 

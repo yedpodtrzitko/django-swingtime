@@ -1,14 +1,16 @@
 #!/usr/bin/env python
-import pytest
+from datetime import date, datetime, time, timedelta
 from pprint import pformat
-from datetime import datetime, timedelta, date, time
+
+import pytest
 from dateutil import rrule
-from django.urls import reverse
 from django.forms.models import model_to_dict
+from django.urls import reverse
+
 import swingtime
 from swingtime import utils
-from swingtime.models import *
 from swingtime.forms import EventForm, MultipleOccurrenceForm
+from swingtime.models import *
 
 expected_table_1 = """\
 | 15:00 |          |          |          |          |          |

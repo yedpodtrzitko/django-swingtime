@@ -5,16 +5,18 @@
 #---------------------------------------------------------------------------------+
 """
 import os
+from datetime import date, datetime, time, timedelta
+
 import django
+from dateutil import rrule
+from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
-from django.contrib.auth.models import User
-from datetime import datetime, date, time, timedelta
-from django.conf import settings
+from django.core.management.color import color_style
 from django.db.models import signals
 from django.utils.termcolors import make_style
-from django.core.management.color import color_style
-from dateutil import rrule
+
 from swingtime import models as swingtime
 
 

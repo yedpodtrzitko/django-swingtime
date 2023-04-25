@@ -2,14 +2,14 @@
 Common features and functions for swingtime
 """
 import calendar
-from collections import defaultdict
-from datetime import datetime, date, time, timedelta
 import itertools
+from collections import defaultdict
+from datetime import date, datetime, time, timedelta
 
+from dateutil import rrule
 from django.db.models.query import QuerySet
 from django.utils.safestring import mark_safe
 
-from dateutil import rrule
 from .conf import swingtime_settings
 from .models import EventType, Occurrence
 

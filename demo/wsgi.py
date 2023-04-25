@@ -1,4 +1,5 @@
-import os, sys
+import os
+import sys
 
 ROOT_DIR = "/var/www/swingtime.com/"
 

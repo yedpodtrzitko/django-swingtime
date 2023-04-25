@@ -1,8 +1,9 @@
 import os
+
 from django.contrib import admin
-from django.views.static import serve
 from django.urls import include, re_path
-from django.views.generic import TemplateView, RedirectView
+from django.views.generic import RedirectView, TemplateView
+from django.views.static import serve
 
 doc_root = os.path.join(os.path.dirname(os.path.dirname(__file__)), "docs/")
 

@@ -1,16 +1,17 @@
 """
 Convenience forms for adding and updating ``Event`` and ``Occurrence``s.
 """
-from datetime import datetime, date, time, timedelta
-from django import forms
-from django.forms.utils import to_current_timezone
-from django.utils.translation import gettext_lazy as _
-from django.forms.widgets import SelectDateWidget
+from datetime import date, datetime, time, timedelta
 
 from dateutil import rrule
+from django import forms
+from django.forms.utils import to_current_timezone
+from django.forms.widgets import SelectDateWidget
+from django.utils.translation import gettext_lazy as _
+
+from . import utils
 from .conf import swingtime_settings
 from .models import *
-from . import utils
 
 WEEKDAY_SHORT = (
     (7, _("Sun")),
