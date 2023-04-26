@@ -6,6 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from timezone_field import TimeZoneField
 
 from .conf import swingtime_settings
 
@@ -54,7 +55,7 @@ class Event(models.Model):
     """
     Container model for general metadata and associated ``Occurrence`` entries.
     """
-
+    calendar = models.ForeignKey("Calendar", on_delete=models.CASCADE)
     title = models.CharField(_("title"), max_length=32)
     description = models.CharField(_("description"), max_length=100)
     event_type = models.ForeignKey(
@@ -75,7 +76,7 @@ class Event(models.Model):
 
     def add_occurrences(self, start_time, end_time, **rrule_params):
         """
-        Add one or more occurences to the event using a comparable API to
+        Add one or more occurrences to the event using a comparable API to
         ``dateutil.rrule``.
 
         If ``rrule_params`` does not contain a ``freq``, one will be defaulted
@@ -194,13 +195,13 @@ class Occurrence(models.Model):
 
 
 def create_event(
-    title,
-    event_type,
-    description="",
-    start_time=None,
-    end_time=None,
-    note=None,
-    **rrule_params
+        title,
+        event_type,
+        description="",
+        start_time=None,
+        end_time=None,
+        note=None,
+        **rrule_params
 ):
     """
     Convenience function to create an ``Event``, optionally create an
@@ -244,3 +245,9 @@ def create_event(
     end_time = end_time or (start_time + swingtime_settings.DEFAULT_OCCURRENCE_DURATION)
     event.add_occurrences(start_time, end_time, **rrule_params)
     return event
+
+
+class Calendar(models.Model):
+    name = models.CharField(max_length=128)
+    owner = models.ForeignKey(swingtime_settings.CALENDAR_OWNER_MODEL, on_delete=models.CASCADE, null=True)
+    timezone = TimeZoneField()

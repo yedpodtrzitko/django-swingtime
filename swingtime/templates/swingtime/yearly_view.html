@@ -30,7 +30,7 @@
             {% for o in occurrences %}
             <td><a href="{{ o.get_absolute_url }}">{{ o.title }}</a></td>
             <td>
-                <a href="{% url 'swingtime-daily-view' o.start_time.year o.start_time.month o.start_time.day %}">
+                <a href="{% url 'swingtime-daily-view' calendar.id o.start_time.year o.start_time.month o.start_time.day %}">
                     {{ o.start_time|date:"l, M jS" }}</a></td>
             <td>{{ o.start_time|date:"P" }}</td>
             <td>{{ o.end_time|date:"P" }}</td>

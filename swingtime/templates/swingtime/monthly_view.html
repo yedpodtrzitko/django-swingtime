@@ -15,22 +15,22 @@
         <a class="plain" href="{% url 'swingtime-monthly-view' next_month.year next_month.month %}"
            title="Next Month">&rarr;</a>
     </h4>
-    <table class="month-view">
+    <table class="w-full text-center">
         <thead>
-        <tr>
+        <tr class="bg-gray-100">
             {% for week_day in week_days %}
-                <th>{{ week_day }}</th>
+                <th style="width: 14.3%">{{ week_day }}</th>
             {% endfor %}
         </tr>
         </thead>
         <tbody>
         {% for row in calendar %}
-            <tr>
+            <tr class="h-10">
                 {% for day,items in row %}
-                    <td{% if day == today.day %} class="today"{% endif %}>
+                    <td class="border {% if day == today.day %}today{% endif %}">
                         {% if day %}
                             <div class="day-ordinal">
-                                <a href="{% url 'swingtime-daily-view' this_month.year this_month.month day %}">{{ day }}</a>
+                                <a href="{% url 'swingtime-daily-view' calendar.id this_month.year this_month.month day %}">{{ day }}</a>
                             </div>
                             {% if items %}
                                 <ul>{% for item in items %}

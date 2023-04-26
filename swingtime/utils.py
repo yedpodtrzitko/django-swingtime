@@ -87,14 +87,14 @@ class DefaultOccurrenceProxy(BaseOccurrenceProxy):
 
 
 def create_timeslot_table(
-    dt=None,
-    items=None,
-    start_time=swingtime_settings.TIMESLOT_START_TIME,
-    end_time_delta=swingtime_settings.TIMESLOT_END_TIME_DURATION,
-    time_delta=swingtime_settings.TIMESLOT_INTERVAL,
-    min_columns=swingtime_settings.TIMESLOT_MIN_COLUMNS,
-    css_class_cycles=css_class_cycler,
-    proxy_class=DefaultOccurrenceProxy,
+        dt: datetime,
+        items=None,
+        start_time=swingtime_settings.TIMESLOT_START_TIME,
+        end_time_delta=swingtime_settings.TIMESLOT_END_TIME_DURATION,
+        time_delta=swingtime_settings.TIMESLOT_INTERVAL,
+        min_columns=swingtime_settings.TIMESLOT_MIN_COLUMNS,
+        css_class_cycles=css_class_cycler,
+        proxy_class=DefaultOccurrenceProxy,
 ):
     """
     Create a grid-like object representing a sequence of times (rows) and
@@ -105,7 +105,7 @@ def create_timeslot_table(
     that falls with the temporal scope of the grid, then that ``start_time`` will
     also match an interval in the sequence of the computed row entries.
 
-    * ``dt`` - a ``datetime.datetime`` instance or ``None`` to default to now
+    * ``dt`` - a ``datetime.datetime`` instance
     * ``items`` - a queryset or sequence of ``Occurrence`` instances. If
       ``None``, default to the daily occurrences for ``dt``
     * ``start_time`` - a ``datetime.time`` instance
@@ -120,10 +120,10 @@ def create_timeslot_table(
       handle the custom output via its __unicode__ method.
 
     """
-    dt = dt or datetime.now()
-    start_time = (
-        start_time.replace(tzinfo=dt.tzinfo) if not start_time.tzinfo else start_time
-    )
+    # if not start_time.tzinfo:
+    assert not start_time.tzinfo
+    assert dt.tzinfo
+    start_time = start_time.replace(tzinfo=dt.tzinfo)
     dtstart = datetime.combine(dt.date(), start_time)
     dtend = dtstart + end_time_delta
 
@@ -142,7 +142,7 @@ def create_timeslot_table(
     # fill the timeslot buckets with occurrence proxies
     for item in sorted(items):
         if item.end_time <= dtstart:
-            # this item began before the start of our schedle constraints
+            # this item began before the start of our schedule constraints
             continue
 
         if item.start_time > dtstart:
@@ -152,7 +152,7 @@ def create_timeslot_table(
 
         timeslot = timeslots.get(rowkey, None)
         if timeslot is None:
-            # TODO fix atypical interval boundry spans
+            # TODO fix atypical interval boundary spans
             # This is rather draconian, we should probably try to find a better
             # way to indicate that this item actually occurred between 2 intervals
             # and to account for the fact that this item may be spanning cells

@@ -11,14 +11,14 @@ from django.shortcuts import get_object_or_404, render
 from . import forms, utils
 from .conf import swingtime_settings
 from .forms import WEEKDAY_SHORT
-from .models import Event, Occurrence
+from .models import Event, Occurrence, Calendar
 
 if swingtime_settings.CALENDAR_FIRST_WEEKDAY is not None:
     calendar.setfirstweekday(swingtime_settings.CALENDAR_FIRST_WEEKDAY)
 
 
 def event_listing(
-    request, template="swingtime/event_list.html", events=None, **extra_context
+        request, template="swingtime/event_list.html", events=None, **extra_context
 ):
     """
     View all ``events``.
@@ -38,11 +38,11 @@ def event_listing(
 
 
 def event_view(
-    request,
-    pk,
-    template="swingtime/event_detail.html",
-    event_form_class=forms.EventForm,
-    recurrence_form_class=forms.MultipleOccurrenceForm,
+        request,
+        pk,
+        template="swingtime/event_detail.html",
+        event_form_class=forms.EventForm,
+        recurrence_form_class=forms.MultipleOccurrenceForm,
 ):
     """
     View an ``Event`` instance and optionally update either the event or its
@@ -79,17 +79,17 @@ def event_view(
         "event": event,
         "event_form": event_form or event_form_class(instance=event),
         "recurrence_form": recurrence_form
-        or recurrence_form_class(initial={"dtstart": datetime.now()}),
+                           or recurrence_form_class(initial={"dtstart": datetime.now()}),
     }
     return render(request, template, data)
 
 
 def occurrence_view(
-    request,
-    event_pk,
-    pk,
-    template="swingtime/occurrence_detail.html",
-    form_class=forms.SingleOccurrenceForm,
+        request,
+        event_pk,
+        pk,
+        template="swingtime/occurrence_detail.html",
+        form_class=forms.SingleOccurrenceForm,
 ):
     """
     View a specific occurrence and optionally handle any updates.
@@ -115,10 +115,10 @@ def occurrence_view(
 
 
 def add_event(
-    request,
-    template="swingtime/add_event.html",
-    event_form_class=forms.EventForm,
-    recurrence_form_class=forms.MultipleOccurrenceForm,
+        request,
+        template="swingtime/add_event.html",
+        event_form_class=forms.EventForm,
+        recurrence_form_class=forms.MultipleOccurrenceForm,
 ):
     """
     Add a new ``Event`` instance and 1 or more associated ``Occurrence``s.
@@ -169,7 +169,7 @@ def add_event(
 
 
 def _datetime_view(
-    request, template, dt, timeslot_factory=None, items=None, params=None
+        request, template: str, calendar: Calendar, dt: datetime, items=None, params=None
 ):
     """
     Build a time slot grid representation for the given datetime ``dt``. See
@@ -190,36 +190,39 @@ def _datetime_view(
         time slot grid of (time, cells) rows
 
     """
-    timeslot_factory = timeslot_factory or utils.create_timeslot_table
     params = params or {}
 
     return render(
         request,
         template,
         {
+            "calendar": calendar,
             "day": dt,
             "next_day": dt + timedelta(days=+1),
             "prev_day": dt + timedelta(days=-1),
-            "timeslots": timeslot_factory(dt, items, **params),
+            "timeslots": utils.create_timeslot_table(dt, items, **params),
         },
     )
 
 
-def day_view(request, year, month, day, template="swingtime/daily_view.html", **params):
+def day_view(request, cid, year, month, day, template="swingtime/daily_view.html", **params):
     """
     See documentation for function``_datetime_view``.
 
     """
-    dt = datetime(int(year), int(month), int(day))
-    return _datetime_view(request, template, dt, **params)
+    calendar = Calendar.objects.get(pk=cid)
+    dt = datetime(int(year), int(month), int(day), tzinfo=calendar.timezone)
+    return _datetime_view(request, template, calendar, dt, **params)
 
 
-def today_view(request, template="swingtime/daily_view.html", **params):
+def today_view(request, cid, template="swingtime/daily_view.html", **params):
     """
     See documentation for function``_datetime_view``.
 
     """
-    return _datetime_view(request, template, datetime.now(), **params)
+    calendar = Calendar.objects.get(pk=cid)
+    dt = datetime.now(tz=calendar.timezone)
+    return _datetime_view(request, template, calendar, dt, **params)
 
 
 def year_view(request, year, template="swingtime/yearly_view.html", queryset=None):
@@ -275,7 +278,7 @@ def year_view(request, year, template="swingtime/yearly_view.html", queryset=Non
 
 
 def month_view(
-    request, year, month, template="swingtime/monthly_view.html", queryset=None
+        request, year, month, template="swingtime/monthly_view.html", queryset=None
 ):
     """
     Render a tradional calendar grid view with temporal navigation variables.
@@ -326,7 +329,7 @@ def month_view(
         "this_month": dtstart,
         "next_month": dtstart + timedelta(days=+last_day),
         "last_month": dtstart + timedelta(days=-1),
-        "week_days": list(WEEKDAY_SHORT.values()),
+        "week_days": [x for (_, x) in WEEKDAY_SHORT],
     }
 
     return render(request, template, data)

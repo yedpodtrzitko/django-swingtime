@@ -13,7 +13,7 @@ urlpatterns = [
         name="swingtime-monthly-view",
     ),
     re_path(
-        r"^calendar/(\d{4})/(0?[1-9]|1[012])/([0-3]?\d)/$",
+        r"^calendar/(\d+)/(\d{4})/(0?[1-9]|1[012])/([0-3]?\d)/$",
         views.day_view,
         name="swingtime-daily-view",
     ),
