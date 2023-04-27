@@ -55,7 +55,8 @@ class Event(models.Model):
     """
     Container model for general metadata and associated ``Occurrence`` entries.
     """
-    calendar = models.ForeignKey("Calendar", on_delete=models.CASCADE)
+
+    group = models.ForeignKey("EventGroup", on_delete=models.CASCADE)
     title = models.CharField(_("title"), max_length=32)
     description = models.CharField(_("description"), max_length=100)
     event_type = models.ForeignKey(
@@ -72,7 +73,8 @@ class Event(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        return reverse("swingtime-event", args=[str(self.id)])
+        assert self.group
+        return reverse("swingtime-event", args=[self.group_id, str(self.id)])
 
     def add_occurrences(self, start_time, end_time, **rrule_params):
         """
@@ -180,7 +182,10 @@ class Occurrence(models.Model):
         return "{}: {}".format(self.title, self.start_time.isoformat())
 
     def get_absolute_url(self):
-        return reverse("swingtime-occurrence", args=[str(self.event.id), str(self.id)])
+        return reverse(
+            "swingtime-occurrence",
+            args=[self.event.group_id, str(self.event.id), str(self.id)],
+        )
 
     def __lt__(self, other):
         return self.start_time < other.start_time
@@ -195,13 +200,14 @@ class Occurrence(models.Model):
 
 
 def create_event(
-        title,
-        event_type,
-        description="",
-        start_time=None,
-        end_time=None,
-        note=None,
-        **rrule_params
+    title,
+    event_type,
+    group,
+    description="",
+    start_time=None,
+    end_time=None,
+    note=None,
+    **rrule_params
 ):
     """
     Convenience function to create an ``Event``, optionally create an
@@ -234,7 +240,10 @@ def create_event(
         )
 
     event = Event.objects.create(
-        title=title, description=description, event_type=event_type
+        title=title,
+        description=description,
+        event_type=event_type,
+        group=group,
     )
 
     if note is not None:
@@ -247,7 +256,9 @@ def create_event(
     return event
 
 
-class Calendar(models.Model):
+class EventGroup(models.Model):
     name = models.CharField(max_length=128)
-    owner = models.ForeignKey(swingtime_settings.CALENDAR_OWNER_MODEL, on_delete=models.CASCADE, null=True)
+    owner = models.ForeignKey(
+        swingtime_settings.GROUP_OWNER_MODEL, on_delete=models.CASCADE, null=True
+    )
     timezone = TimeZoneField()

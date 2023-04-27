@@ -2,16 +2,16 @@
 {% block title %}Yearly View {{ year }}{% endblock %}
 {% block content %}
     <h3>
-        <a class="plain" href="{% url 'swingtime-yearly-view' last_year %}" 
+        <a class="plain" href="{% url 'swingtime-yearly-view' group.id last_year %}"
            title="Last Month">&larr;</a>
         Yearly View {{ year }}
-        <a class="plain" href="{% url 'swingtime-yearly-view' next_year %}" 
+        <a class="plain" href="{% url 'swingtime-yearly-view' group.id next_year %}"
            title="Next Month">&rarr;</a>
     </h3>
-    
+
     {% if by_month %}
-    <table class="w-100">
-        <thead>
+        <table class="w-full">
+            <thead>
             <tr>
                 <th>Month</th>
                 <th>Title</th>
@@ -19,30 +19,30 @@
                 <th>Start</th>
                 <th>End</th>
             </tr>
-        </thead>
-        <tbody>
-        {% for dt,occurrences in by_month %}
-        <tr class="month-divider">
-            <th rowspan="{{ occurrences|length }}">
-                <a href="{% url 'swingtime-monthly-view' dt.year dt.month %}">
-                    {{ dt|date:"F" }}</a>
-            </th>
-            {% for o in occurrences %}
-            <td><a href="{{ o.get_absolute_url }}">{{ o.title }}</a></td>
-            <td>
-                <a href="{% url 'swingtime-daily-view' calendar.id o.start_time.year o.start_time.month o.start_time.day %}">
-                    {{ o.start_time|date:"l, M jS" }}</a></td>
-            <td>{{ o.start_time|date:"P" }}</td>
-            <td>{{ o.end_time|date:"P" }}</td>
-        </tr>
-            {% if not forloop.last %}
-        <tr>
-            {% endif %}
+            </thead>
+            <tbody>
+            {% for dt,occurrences in by_month %}
+                <tr class="month-divider">
+                    <th rowspan="{{ occurrences|length }}">
+                        <a href="{% url 'swingtime-monthly-view' dt.year dt.month %}">
+                            {{ dt|date:"F" }}</a>
+                    </th>
+                    {% for o in occurrences %}
+                        <td><a href="{{ o.get_absolute_url }}">{{ o.title }}</a></td>
+                        <td>
+                            <a href="{% url 'swingtime-daily-view' group.id o.start_time.year o.start_time.month o.start_time.day %}">
+                                {{ o.start_time|date:"l, M jS" }}</a></td>
+                        <td>{{ o.start_time|date:"P" }}</td>
+                        <td>{{ o.end_time|date:"P" }}</td>
+                        </tr>
+                        {% if not forloop.last %}
+                            <tr>
+                        {% endif %}
+                    {% endfor %}
             {% endfor %}
-        {% endfor %}
-        </tbody>
-    </table>
+            </tbody>
+        </table>
     {% else %}
-    <p>No events occurring in {{ year }}</p>
+        <p>No events occurring in {{ year }}</p>
     {% endif %}
 {% endblock %}

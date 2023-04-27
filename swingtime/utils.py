@@ -6,11 +6,10 @@ import itertools
 from collections import defaultdict
 from datetime import date, datetime, timedelta
 
-from django.db.models.query import QuerySet
 from django.utils.safestring import mark_safe
 
 from .conf import swingtime_settings
-from .models import EventType, Occurrence
+from .models import EventGroup, EventType, Occurrence
 
 
 def time_delta_total_seconds(time_delta):
@@ -87,14 +86,15 @@ class DefaultOccurrenceProxy(BaseOccurrenceProxy):
 
 
 def create_timeslot_table(
-        dt: datetime,
-        items=None,
-        start_time=swingtime_settings.TIMESLOT_START_TIME,
-        end_time_delta=swingtime_settings.TIMESLOT_END_TIME_DURATION,
-        time_delta=swingtime_settings.TIMESLOT_INTERVAL,
-        min_columns=swingtime_settings.TIMESLOT_MIN_COLUMNS,
-        css_class_cycles=css_class_cycler,
-        proxy_class=DefaultOccurrenceProxy,
+    timezone,
+    dt: datetime,
+    # items=None,
+    start_time=swingtime_settings.TIMESLOT_START_TIME,
+    end_time_delta=swingtime_settings.TIMESLOT_END_TIME_DURATION,
+    time_delta=swingtime_settings.TIMESLOT_INTERVAL,
+    min_columns=swingtime_settings.TIMESLOT_MIN_COLUMNS,
+    css_class_cycles=css_class_cycler,
+    proxy_class=DefaultOccurrenceProxy,
 ):
     """
     Create a grid-like object representing a sequence of times (rows) and
@@ -120,17 +120,12 @@ def create_timeslot_table(
       handle the custom output via its __unicode__ method.
 
     """
-    # if not start_time.tzinfo:
-    assert not start_time.tzinfo
-    assert dt.tzinfo
-    start_time = start_time.replace(tzinfo=dt.tzinfo)
+    start_time = start_time.replace(tzinfo=timezone)
+
     dtstart = datetime.combine(dt.date(), start_time)
     dtend = dtstart + end_time_delta
 
-    if isinstance(items, QuerySet):
-        items = items._clone()
-    elif not items:
-        items = Occurrence.objects.daily_occurrences(dt).select_related("event")
+    items = Occurrence.objects.daily_occurrences(dt).select_related("event")
 
     # build a mapping of timeslot "buckets"
     timeslots = {}
@@ -141,6 +136,8 @@ def create_timeslot_table(
 
     # fill the timeslot buckets with occurrence proxies
     for item in sorted(items):
+        item.end_time = item.end_time.replace(tzinfo=timezone)
+        item.start_time = item.start_time.replace(tzinfo=timezone)
         if item.end_time <= dtstart:
             # this item began before the start of our schedule constraints
             continue

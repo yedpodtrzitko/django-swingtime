@@ -2,8 +2,6 @@ import datetime
 import os
 import sys
 
-import django
-
 try:
     # dateutil is an absolute requirement
     import dateutil

@@ -29,9 +29,8 @@ DEFAULT_SETTINGS = {
     "DEFAULT_OCCURRENCE_DURATION": datetime.timedelta(hours=+1),
     # If not None, passed to the calendar module's setfirstweekday function.
     "CALENDAR_FIRST_WEEKDAY": 6,
-
-    # Calendar model has foreign key to a specific model
-    "CALENDAR_OWNER_MODEL": "auth.User",
+    # event group model has foreign key to a specific model
+    "GROUP_OWNER_MODEL": "auth.User",
 }
 
 _user_settings = getattr(settings, "SWINGTIME", {})

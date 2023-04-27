@@ -5,24 +5,26 @@
     <p><em>Click a time from the Time column to add a new event...</em></p>
     <h4>
         <a class="plain"
-           href="{% url 'swingtime-daily-view' calendar.id prev_day.year prev_day.month prev_day.day %}">
+           href="{% url 'swingtime-daily-view' group.id prev_day.year prev_day.month prev_day.day %}">
             &larr;</a>
         {{ day|date:"l, N jS Y" }}
         <a class="plain"
-           href="{% url 'swingtime-daily-view' calendar.id next_day.year next_day.month next_day.day %}">&rarr;</a>
+           href="{% url 'swingtime-daily-view' group.id next_day.year next_day.month next_day.day %}">&rarr;</a>
     </h4>
     <table class="w-full">
         <thead>
         <tr>
             <th class="center">Time</th>
-            <th>{{ calendar.name }}</th>
+            <th>{{ group.name }}</th>
         </tr>
         </thead>
         <tbody>
         {% for tm,cells in timeslots %}
             <tr class="border">
-                <th class="center"><a href="{% url 'swingtime-add-event' %}?dtstart={{ tm.isoformat }}">
-                    {{ tm|date:"h:i a" }}</a></th>
+                <th class="center">
+                    <a href="{% url 'swingtime-add-event' group.id %}?dtstart={{ tm.isoformat }}">
+                        {{ tm|date:"h:i a" }}
+                    </a></th>
                 {% for cell in cells %}
                     <td{% if cell.event_class %} class="{{ cell.event_class }}"{% endif %}>{{ cell }}</td>
                 {% endfor %}

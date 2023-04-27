@@ -3,17 +3,17 @@
 from django.db import migrations
 
 
-def create_calendar(apps, schema_editor):
+def create_group(apps, schema_editor):
     # We can't import the Person model directly as it may be a newer
     # version than this migration expects. We use the historical version.
-    Calendar = apps.get_model("swingtime", "Calendar")
-    if not Calendar.objects.count():
-        Calendar.objects.create(id=1, name="default calendar", timezone="UTC")
+    EventGroup = apps.get_model("swingtime", "EventGroup")
+    if not EventGroup.objects.count():
+        EventGroup.objects.create(id=1, name="default group", timezone="UTC")
 
 
-def remove_calendar(apps, schema_editor):
-    Calendar = apps.get_model("swingtime", "Calendar")
-    Calendar.objects.filter(pk=1).delete()
+def remove_group(apps, schema_editor):
+    EventGroup = apps.get_model("swingtime", "EventGroup")
+    EventGroup.objects.filter(pk=1).delete()
 
 
 class Migration(migrations.Migration):
@@ -22,5 +22,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_calendar, remove_calendar),
+        migrations.RunPython(create_group, remove_group),
     ]

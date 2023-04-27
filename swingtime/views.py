@@ -11,14 +11,14 @@ from django.shortcuts import get_object_or_404, render
 from . import forms, utils
 from .conf import swingtime_settings
 from .forms import WEEKDAY_SHORT
-from .models import Event, Occurrence, Calendar
+from .models import Event, EventGroup, Occurrence
 
 if swingtime_settings.CALENDAR_FIRST_WEEKDAY is not None:
     calendar.setfirstweekday(swingtime_settings.CALENDAR_FIRST_WEEKDAY)
 
 
 def event_listing(
-        request, template="swingtime/event_list.html", events=None, **extra_context
+    request, template="swingtime/event_list.html", events=None, **extra_context
 ):
     """
     View all ``events``.
@@ -38,11 +38,12 @@ def event_listing(
 
 
 def event_view(
-        request,
-        pk,
-        template="swingtime/event_detail.html",
-        event_form_class=forms.EventForm,
-        recurrence_form_class=forms.MultipleOccurrenceForm,
+    request,
+    gid: int,
+    pk: int,
+    template="swingtime/event_detail.html",
+    event_form_class=forms.EventForm,
+    recurrence_form_class=forms.MultipleOccurrenceForm,
 ):
     """
     View an ``Event`` instance and optionally update either the event or its
@@ -59,7 +60,7 @@ def event_view(
     ``recurrence_form``
         a form object for adding occurrences
     """
-    event = get_object_or_404(Event, pk=pk)
+    event = get_object_or_404(Event, pk=int(pk), group_id=int(gid))
     event_form = recurrence_form = None
     if request.method == "POST":
         if "_update" in request.POST:
@@ -76,20 +77,22 @@ def event_view(
             return http.HttpResponseBadRequest("Bad Request")
 
     data = {
+        "group": event.group,
         "event": event,
         "event_form": event_form or event_form_class(instance=event),
         "recurrence_form": recurrence_form
-                           or recurrence_form_class(initial={"dtstart": datetime.now()}),
+        or recurrence_form_class(initial={"dtstart": datetime.now()}),
     }
     return render(request, template, data)
 
 
 def occurrence_view(
-        request,
-        event_pk,
-        pk,
-        template="swingtime/occurrence_detail.html",
-        form_class=forms.SingleOccurrenceForm,
+    request,
+    gid,
+    event_pk,
+    pk,
+    template="swingtime/occurrence_detail.html",
+    form_class=forms.SingleOccurrenceForm,
 ):
     """
     View a specific occurrence and optionally handle any updates.
@@ -102,7 +105,10 @@ def occurrence_view(
     ``form``
         a form object for updating the occurrence
     """
-    occurrence = get_object_or_404(Occurrence, pk=pk, event__pk=event_pk)
+    occurrence = get_object_or_404(Occurrence, pk=pk, event_id=event_pk)
+    group = occurrence.event.group
+    assert group.id == int(gid)
+
     if request.method == "POST":
         form = form_class(request.POST, instance=occurrence)
         if form.is_valid():
@@ -111,14 +117,17 @@ def occurrence_view(
     else:
         form = form_class(instance=occurrence)
 
-    return render(request, template, {"occurrence": occurrence, "form": form})
+    return render(
+        request, template, {"group": group, "occurrence": occurrence, "form": form}
+    )
 
 
 def add_event(
-        request,
-        template="swingtime/add_event.html",
-        event_form_class=forms.EventForm,
-        recurrence_form_class=forms.MultipleOccurrenceForm,
+    request,
+    gid,
+    template="swingtime/add_event.html",
+    event_form_class=forms.EventForm,
+    recurrence_form_class=forms.MultipleOccurrenceForm,
 ):
     """
     Add a new ``Event`` instance and 1 or more associated ``Occurrence``s.
@@ -136,6 +145,7 @@ def add_event(
         a form object for adding occurrences
 
     """
+    group = get_object_or_404(EventGroup, pk=int(gid))
     dtstart = None
     if request.method == "POST":
         event_form = event_form_class(request.POST)
@@ -161,6 +171,7 @@ def add_event(
         request,
         template,
         {
+            "group": group,
             "dtstart": dtstart,
             "event_form": event_form,
             "recurrence_form": recurrence_form,
@@ -168,9 +179,7 @@ def add_event(
     )
 
 
-def _datetime_view(
-        request, template: str, calendar: Calendar, dt: datetime, items=None, params=None
-):
+def _datetime_view(request, template: str, group: EventGroup, dt: datetime, **params):
     """
     Build a time slot grid representation for the given datetime ``dt``. See
     utils.create_timeslot_table documentation for items and params.
@@ -190,42 +199,44 @@ def _datetime_view(
         time slot grid of (time, cells) rows
 
     """
-    params = params or {}
-
     return render(
         request,
         template,
         {
-            "calendar": calendar,
+            "group": group,
             "day": dt,
             "next_day": dt + timedelta(days=+1),
             "prev_day": dt + timedelta(days=-1),
-            "timeslots": utils.create_timeslot_table(dt, items, **params),
+            "timeslots": utils.create_timeslot_table(group.timezone, dt, **params),
         },
     )
 
 
-def day_view(request, cid, year, month, day, template="swingtime/daily_view.html", **params):
+def day_view(
+    request, cid, year, month, day, template="swingtime/daily_view.html", **params
+):
     """
     See documentation for function``_datetime_view``.
 
     """
-    calendar = Calendar.objects.get(pk=cid)
-    dt = datetime(int(year), int(month), int(day), tzinfo=calendar.timezone)
-    return _datetime_view(request, template, calendar, dt, **params)
+    group = EventGroup.objects.get(pk=cid)
+    dt = datetime(int(year), int(month), int(day), tzinfo=group.timezone)
+    return _datetime_view(request, template, group, dt, **params)
 
 
-def today_view(request, cid, template="swingtime/daily_view.html", **params):
+def today_view(request, gid: int, template="swingtime/daily_view.html", **params):
     """
     See documentation for function``_datetime_view``.
 
     """
-    calendar = Calendar.objects.get(pk=cid)
-    dt = datetime.now(tz=calendar.timezone)
-    return _datetime_view(request, template, calendar, dt, **params)
+    group = EventGroup.objects.get(pk=gid)
+    dt = datetime.now(tz=group.timezone)
+    return _datetime_view(request, template, group, dt, **params)
 
 
-def year_view(request, year, template="swingtime/yearly_view.html", queryset=None):
+def year_view(
+    request, gid: int, year: int, template="swingtime/yearly_view.html", queryset=None
+):
     """
 
     Context parameters:
@@ -246,6 +257,8 @@ def year_view(request, year, template="swingtime/yearly_view.html", queryset=Non
         which have at least 1 occurrence is represented in the list
 
     """
+    group = get_object_or_404(EventGroup, pk=int(gid))
+
     year = int(year)
     queryset = (
         queryset._clone()
@@ -267,6 +280,7 @@ def year_view(request, year, template="swingtime/yearly_view.html", queryset=Non
         request,
         template,
         {
+            "group": group,
             "year": year,
             "by_month": [
                 (dt, list(o)) for dt, o in itertools.groupby(occurrences, group_key)
@@ -278,10 +292,15 @@ def year_view(request, year, template="swingtime/yearly_view.html", queryset=Non
 
 
 def month_view(
-        request, year, month, template="swingtime/monthly_view.html", queryset=None
+    request,
+    gid: int,
+    year: int,
+    month: int,
+    template="swingtime/monthly_view.html",
+    queryset=None,
 ):
     """
-    Render a tradional calendar grid view with temporal navigation variables.
+    Render a traditional calendar grid view with temporal navigation variables.
 
     Context parameters:
 
@@ -303,10 +322,11 @@ def month_view(
         this_month - 1 month
 
     """
+    group = get_object_or_404(EventGroup, pk=int(gid))
     year, month = int(year), int(month)
-    cal = calendar.monthcalendar(year, month)
+    cal_data = calendar.monthcalendar(year, month)
     dtstart = datetime(year, month, 1)
-    last_day = max(cal[-1])
+    last_day = max(cal_data[-1])
 
     # TODO Whether to include those occurrences that started in the previous
     # month but end in this month?
@@ -325,7 +345,8 @@ def month_view(
     )
     data = {
         "today": datetime.now(),
-        "calendar": [[(d, by_day.get(d, [])) for d in row] for row in cal],
+        "group": group,
+        "calendar_data": [[(d, by_day.get(d, [])) for d in row] for row in cal_data],
         "this_month": dtstart,
         "next_month": dtstart + timedelta(days=+last_day),
         "last_month": dtstart + timedelta(days=-1),
