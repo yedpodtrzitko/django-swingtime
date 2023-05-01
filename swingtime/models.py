@@ -78,7 +78,7 @@ class Event(models.Model):
         assert self.group
         return reverse("swingtime-event", args=[self.group_id, str(self.id)])
 
-    def add_occurrences(self, start_time, end_time, **rrule_params):
+    def add_occurrences(self, start_time: datetime, end_time: datetime, **rrule_params):
         """
         Add one or more occurrences to the event using a comparable API to
         ``dateutil.rrule``.

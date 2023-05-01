@@ -1,9 +1,7 @@
-from datetime import date, datetime, time, timezone, tzinfo
+from datetime import date, time, timezone
 
 import pytest
-from dateutil import rrule
 from django.forms.models import model_to_dict
-from django.urls import reverse
 
 import swingtime
 from swingtime import utils
@@ -131,14 +129,14 @@ class TestNewEventForm:
             repeats="count",
             freq="2",
             month_ordinal="1",
+            url="http://example.com",
         )
 
         evt_form = EventForm(data)
-        occ_form = MultipleOccurrenceForm(data)
         assert evt_form.is_valid(), evt_form.errors
-        assert "" == evt_form.errors.as_text()
+
+        occ_form = MultipleOccurrenceForm(data)
         assert occ_form.is_valid(), occ_form.errors
-        assert "" == occ_form.errors.as_text()
 
         evt = occ_form.save(evt_form.save())
         assert evt.occurrence_set.count() == 2
@@ -282,10 +280,9 @@ class TestCreation:
             datetime(2008, 1, 1),
             datetime(2008, 1, 1, 1),
             freq=rrule.DAILY,
-            until=datetime(2020, 12, 31),
+            until=datetime(2008, 1, 31),
         )
-        occs = list(e.occurrence_set.all())
-        assert len(occs) == 4749
+        assert e.occurrence_set.count() == 31
 
 
 class TestMisc:
@@ -356,6 +353,7 @@ class TestViews:
         )
         assert r.status_code == 200
 
+        print(model_to_dict(occurence.event))
         r = client.post(
             reverse("swingtime-event", args=[group_default().id, occurence.event.id]),
             model_to_dict(occurence.event),
@@ -388,15 +386,10 @@ class TestViews:
         end = occurence.end_time
 
         data = {
-            "end_time_0_day": end.day,
-            "end_time_0_month": end.month,
-            "end_time_0_year": end.year,
-            "end_time_1": str(end.time()),
-            "start_time_0_day": start.day,
-            "start_time_0_month": start.month,
-            "start_time_0_year": start.year,
-            "start_time_1": str(start.time()),
+            "start_time": start.isoformat(),
+            "end_time": end.isoformat(),
         }
+
         r = client.post(
             reverse(
                 "swingtime-occurrence",

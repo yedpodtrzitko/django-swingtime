@@ -146,12 +146,14 @@ def add_event(
 
     """
     group = get_object_or_404(EventGroup, pk=int(gid))
-    dtstart = None
+    dtstart = datetime.now()
     if request.method == "POST":
         event_form = event_form_class(request.POST)
         recurrence_form = recurrence_form_class(request.POST)
         if event_form.is_valid() and recurrence_form.is_valid():
-            event = event_form.save()
+            event = event_form.save(commit=False)
+            event.group = group
+            event.save()
             recurrence_form.save(event)
             return http.HttpResponseRedirect(event.get_absolute_url())
 
@@ -163,8 +165,7 @@ def add_event(
                 # TODO: A badly formatted date is passed to add_event
                 logging.warning(exc)
 
-        dtstart = dtstart or datetime.now()
-        event_form = event_form_class()
+        event_form = event_form_class(initial=dict(group=group.id))
         recurrence_form = recurrence_form_class(initial={"dtstart": dtstart})
 
     return render(

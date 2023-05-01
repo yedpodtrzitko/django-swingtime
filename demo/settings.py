@@ -84,4 +84,6 @@ try:
 except ImportError:
     pass
 else:
-    INSTALLED_APPS += ["django_extensions",]
+    INSTALLED_APPS += [
+        "django_extensions",
+    ]

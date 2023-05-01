@@ -3,11 +3,21 @@
 {% block head %}
     {{ block.super }}
     <script>
-        function showTab(wrapperNode, showNode) {
-            document.querySelectorAll(wrapperNode + ' .tab').forEach((node) => node.classList.add('hidden'));
-            document.querySelector(wrapperNode + ' ' + showNode).classList.remove('hidden');
+        let tabsItems = "#rec-tabs";
+        let tabsContent = '#rec-tabs-content';
 
+        function showTab(showNode) {
+            document.querySelectorAll(tabsContent + ' .tab').forEach((node) => node.classList.add('hidden'));
+            if (showNode) {
+                document.querySelector(tabsContent + ' ' + showNode).classList.remove('hidden');
+            }
         }
+
+        window.addEventListener('load', function () {
+            // trigger showTab click event
+            document.querySelector(tabsItems + ' input:checked').click();
+        })
+
     </script>
 {% endblock head %}
 {% block content %}
@@ -16,8 +26,9 @@
     {{ event_form.non_field_errors }}
     {{ recurring_form.non_field_errors }}
     {% if event_form.errors or recurrence_form.errors %}
-        <p class="form-errors">Please fix any errors.</p>
+        <p class="form-errors">Please fix errors in the form.</p>
     {% endif %}
+
     <form method="post" action="">
         {% csrf_token %}
         <table>

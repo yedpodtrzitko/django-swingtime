@@ -187,6 +187,10 @@ class MultipleIntegerField(forms.MultipleChoiceField):
         return [int(i) for i in super().clean(value)]
 
 
+class DateInput(forms.DateInput):
+    input_type = "date"
+
+
 class SplitDateTimeWidget(forms.MultiWidget):
     """
     A Widget that splits datetime input into a SelectDateWidget for dates and
@@ -209,9 +213,7 @@ class SplitDateTimeWidget(forms.MultiWidget):
 
 
 class MultipleOccurrenceForm(forms.Form):
-    day = forms.DateField(
-        label=_("Date"), initial=date.today, widget=SelectDateWidget()
-    )
+    day = forms.DateField(label=_("Date"), initial=date.today, widget=DateInput)
 
     start_time_delta = forms.IntegerField(
         label=_("Start time"),
@@ -238,9 +240,7 @@ class MultipleOccurrenceForm(forms.Form):
         widget=forms.TextInput(attrs=dict(size=2, max_length=2)),
     )
 
-    until = forms.DateField(
-        required=False, initial=date.today, widget=SelectDateWidget()
-    )
+    until = forms.DateField(required=False, initial=date.today, widget=DateInput)
 
     freq = forms.IntegerField(
         label=_("Frequency"),
@@ -333,6 +333,12 @@ class MultipleOccurrenceForm(forms.Form):
                 seconds=self.cleaned_data["end_time_delta"]
             )
 
+            if until := self.cleaned_data.get("until"):
+                if until < day.date():
+                    raise ValueError(
+                        "Until date must be further in future than start date"
+                    )
+
         return self.cleaned_data
 
     def save(self, event):
@@ -384,22 +390,20 @@ class MultipleOccurrenceForm(forms.Form):
 class EventForm(forms.ModelForm):
     """
     A simple form for adding and updating Event attributes
-
     """
 
     class Meta:
         model = Event
-        exclude = ("event_type",)
+        fields = "__all__"
 
 
 class SingleOccurrenceForm(forms.ModelForm):
     """
     A simple form for adding and updating single Occurrence attributes
-
     """
 
-    start_time = forms.SplitDateTimeField(widget=SplitDateTimeWidget)
-    end_time = forms.SplitDateTimeField(widget=SplitDateTimeWidget)
+    start_time = forms.DateTimeField()
+    end_time = forms.DateTimeField()
 
     class Meta:
         model = Occurrence

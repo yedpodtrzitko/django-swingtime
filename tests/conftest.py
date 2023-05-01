@@ -35,7 +35,12 @@ def play_type():
 
 @pytest.fixture
 def occurence(work_type, group_default):
-    e = Event.objects.create(event_type=work_type, title="event", group=group_default())
+    e = Event.objects.create(
+        event_type=work_type,
+        title="event",
+        group=group_default(),
+        url="https://example.com/occ/",
+    )
     return Occurrence.objects.create(
         event=e,
         start_time=datetime(2018, 3, 18, 16, 00),
