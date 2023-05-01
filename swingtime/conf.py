@@ -31,6 +31,8 @@ DEFAULT_SETTINGS = {
     "CALENDAR_FIRST_WEEKDAY": 6,
     # event group model has foreign key to a specific model
     "GROUP_OWNER_MODEL": "auth.User",
+    "FORM_EVENT": "swingtime.forms.EventForm",
+    "FORM_RECURRENCE": "swingtime.forms.MultipleOccurrenceForm",
 }
 
 _user_settings = getattr(settings, "SWINGTIME", {})

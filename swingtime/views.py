@@ -7,6 +7,7 @@ from dateutil import parser
 from django import http
 from django.db import models
 from django.shortcuts import get_object_or_404, render
+from django.utils.module_loading import import_string
 
 from . import forms, utils
 from .conf import swingtime_settings
@@ -15,6 +16,18 @@ from .models import Event, EventGroup, Occurrence
 
 if swingtime_settings.CALENDAR_FIRST_WEEKDAY is not None:
     calendar.setfirstweekday(swingtime_settings.CALENDAR_FIRST_WEEKDAY)
+
+
+def load_config_form(form_class):
+    if isinstance(form_class, str):
+        return import_string(form_class)
+    elif callable(form_class):
+        return form_class()
+    return form_class
+
+
+EventForm = load_config_form(swingtime_settings.FORM_EVENT)
+ReccuranceForm = load_config_form(swingtime_settings.FORM_RECURRENCE)
 
 
 def event_listing(
@@ -42,8 +55,6 @@ def event_view(
     gid: int,
     pk: int,
     template="swingtime/event_detail.html",
-    event_form_class=forms.EventForm,
-    recurrence_form_class=forms.MultipleOccurrenceForm,
 ):
     """
     View an ``Event`` instance and optionally update either the event or its
@@ -60,16 +71,21 @@ def event_view(
     ``recurrence_form``
         a form object for adding occurrences
     """
+
     event = get_object_or_404(Event, pk=int(pk), group_id=int(gid))
-    event_form = recurrence_form = None
+    group = event.group
+    recurrence_form = ReccuranceForm(
+        initial={"dtstart": datetime.now(tz=group.timezone)}
+    )
+    event_form = EventForm(instance=event)
     if request.method == "POST":
         if "_update" in request.POST:
-            event_form = event_form_class(request.POST, instance=event)
+            event_form = EventForm(request.POST, instance=event)
             if event_form.is_valid():
                 event_form.save(event)
                 return http.HttpResponseRedirect(request.path)
         elif "_add" in request.POST:
-            recurrence_form = recurrence_form_class(request.POST)
+            recurrence_form = ReccuranceForm(request.POST)
             if recurrence_form.is_valid():
                 recurrence_form.save(event)
                 return http.HttpResponseRedirect(request.path)
@@ -79,9 +95,8 @@ def event_view(
     data = {
         "group": event.group,
         "event": event,
-        "event_form": event_form or event_form_class(instance=event),
-        "recurrence_form": recurrence_form
-        or recurrence_form_class(initial={"dtstart": datetime.now()}),
+        "event_form": event_form,
+        "recurrence_form": recurrence_form,
     }
     return render(request, template, data)
 
@@ -126,8 +141,6 @@ def add_event(
     request,
     gid: int,
     template="swingtime/add_event.html",
-    event_form_class=forms.EventForm,
-    recurrence_form_class=forms.MultipleOccurrenceForm,
 ):
     """
     Add a new ``Event`` instance and 1 or more associated ``Occurrence``s.
@@ -146,10 +159,14 @@ def add_event(
 
     """
     group = get_object_or_404(EventGroup, pk=int(gid))
-    dtstart = datetime.now()
+    dtstart = datetime.now(tz=group.timezone)
+
+    recurrence_form = ReccuranceForm(initial={"dtstart": dtstart})
+    event_form = EventForm(initial=dict(group=group.id))
+
     if request.method == "POST":
-        event_form = event_form_class(request.POST)
-        recurrence_form = recurrence_form_class(request.POST)
+        event_form = EventForm(request.POST)
+        recurrence_form = ReccuranceForm(request.POST)
         if event_form.is_valid() and recurrence_form.is_valid():
             event = event_form.save(commit=False)
             event.group = group
@@ -164,9 +181,6 @@ def add_event(
             except (TypeError, ValueError) as exc:
                 # TODO: A badly formatted date is passed to add_event
                 logging.warning(exc)
-
-        event_form = event_form_class(initial=dict(group=group.id))
-        recurrence_form = recurrence_form_class(initial={"dtstart": dtstart})
 
     return render(
         request,

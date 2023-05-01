@@ -353,7 +353,6 @@ class TestViews:
         )
         assert r.status_code == 200
 
-        print(model_to_dict(occurence.event))
         r = client.post(
             reverse("swingtime-event", args=[group_default().id, occurence.event.id]),
             model_to_dict(occurence.event),
