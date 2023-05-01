@@ -10,8 +10,6 @@ from timezone_field import TimeZoneField
 
 from .conf import swingtime_settings
 
-__all__ = ("Note", "EventType", "Event", "Occurrence", "create_event")
-
 
 class Note(models.Model):
     """
@@ -57,17 +55,21 @@ class Event(models.Model):
     """
 
     group = models.ForeignKey("EventGroup", on_delete=models.CASCADE)
-    title = models.CharField(_("title"), max_length=32)
-    description = models.CharField(_("description"), max_length=100)
+    title = models.CharField(_("Title"), max_length=32)
+    description = models.CharField(_("Description"), max_length=100, blank=True)
+    url = models.URLField(_("Event URL"), max_length=256, null=True)
     event_type = models.ForeignKey(
-        EventType, verbose_name=_("event type"), on_delete=models.CASCADE
+        EventType,
+        verbose_name=_("Event Type"),
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
     notes = GenericRelation(Note, verbose_name=_("notes"))
 
     class Meta:
         verbose_name = _("event")
         verbose_name_plural = _("events")
-        ordering = ("title",)
 
     def __str__(self):
         return self.title
