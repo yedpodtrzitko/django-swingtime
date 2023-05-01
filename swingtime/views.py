@@ -1,12 +1,13 @@
 import calendar
 import itertools
 import logging
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from dateutil import parser
 from django import http
 from django.db import models
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.module_loading import import_string
 
 from . import forms, utils
@@ -89,10 +90,16 @@ def event_view(
             if recurrence_form.is_valid():
                 recurrence_form.save(event)
                 return http.HttpResponseRedirect(request.path)
+        elif "_delete" in request.POST:
+            event.delete()
+            return http.HttpResponseRedirect(
+                reverse("swingtime-today", args=[group.id])
+            )
         else:
             return http.HttpResponseBadRequest("Bad Request")
 
     data = {
+        "today": date.today(),
         "group": event.group,
         "event": event,
         "event_form": event_form,
@@ -159,10 +166,8 @@ def add_event(
 
     """
     group = get_object_or_404(EventGroup, pk=int(gid))
-    dtstart = datetime.now(tz=group.timezone)
-
-    recurrence_form = ReccuranceForm(initial={"dtstart": dtstart})
     event_form = EventForm(initial=dict(group=group.id))
+    dtstart = datetime.now(tz=group.timezone)
 
     if request.method == "POST":
         event_form = EventForm(request.POST)
@@ -178,9 +183,10 @@ def add_event(
         if "dtstart" in request.GET:
             try:
                 dtstart = parser.parse(request.GET["dtstart"])
-            except (TypeError, ValueError) as exc:
+            except (TypeError, ValueError) as e:
                 # TODO: A badly formatted date is passed to add_event
-                logging.warning(exc)
+                logging.warning(e)
+        recurrence_form = ReccuranceForm(initial={"dtstart": dtstart})
 
     return render(
         request,
@@ -229,7 +235,7 @@ def _datetime_view(request, template: str, group: EventGroup, dt: datetime, **pa
 
 def day_view(
     request,
-    cid: int,
+    gid: int,
     year: int,
     month: int,
     day: int,
@@ -240,7 +246,13 @@ def day_view(
     See documentation for function``_datetime_view``.
 
     """
-    group = EventGroup.objects.get(pk=cid)
+    group = get_object_or_404(EventGroup, pk=int(gid))
+    if request.method == "POST" and "_goto" in request.POST:
+        dt = datetime.strptime(request.POST.get("date"), "%Y-%m-%d")
+        return redirect(
+            reverse("swingtime-daily-view", args=[group.id, dt.year, dt.month, dt.day])
+        )
+
     dt = datetime(int(year), int(month), int(day), tzinfo=group.timezone)
     return _datetime_view(request, template, group, dt, **params)
 

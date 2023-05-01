@@ -14,98 +14,120 @@
 <tr>
     <th>{{ recurrence_form.repeats.label_tag }}</th>
     <td>
-        {{ recurrence_form.count.errors }}
-        <ul>
-            <li>
-                <label for="id_repeats_0">
-                    <input checked="checked" type="radio" id="id_repeats_0"
-                           value="count" name="repeats"/> A total of
-                </label>
-                {{ recurrence_form.count }} time(s)
-            </li>
-            <li>
-                <label for="id_repeats_1">
-                    <input type="radio" id="id_repeats_1" value="until"
-                           name="repeats"/> Until
-                </label>
-                {{ recurrence_form.until }}</li>
-        </ul>
+        <div>
+            {{ recurrence_form.count.errors }}
+        </div>
+        <div class="inline-block p-2 px-4 border rounded">
+            <label for="id_repeats_0">
+                <input checked="checked" type="radio" id="id_repeats_0"
+                       value="count" name="repeats"/> A total of
+            </label>
+            {{ recurrence_form.count }} time(s)
+        </div>
+        or
+        <div class="inline-block p-2 px-4 border rounded">
+            <label for="id_repeats_1">
+                <input type="radio" id="id_repeats_1" value="until"
+                       name="repeats"/> Until
+            </label>
+            {{ recurrence_form.until }}
+        </div>
     </td>
 </tr>
 
 <tr>
-    <th>{{ recurrence_form.freq.label_tag }}</th>
+    <th class="align-top">{{ recurrence_form.freq.label_tag }}</th>
     <td>
-        {{ recurrence_form.interval.errors }}
-        <div>
-            Every {{ recurrence_form.interval }}
-        </div>
-        <div id="rec-tabs" class="border">
-            <label for="id_freq_0"
-                   class="border inline-block p-2 px-4"
-            >
-                <input type="radio" id="id_freq_0"
-                       onclick="showTab(null)"
-                       value="3" name="freq"/> Day(s)
-            </label>
+        <div class="p-4">
 
-            <label for="id_freq_1" class="inline-block border p-2 px-4">
-                <input checked="checked" type="radio" id="id_freq_1"
-                       onclick="showTab('#rec-weeks')"
-                       value="2" name="freq"/> Week(s)
-            </label>
-
-            <label for="id_freq_2" class="inline-block border p-2 px-4">
-                <input type="radio" id="id_freq_2"
-                       onclick="showTab('#rec-months')"
-                       value="1" name="freq"/> Month(s)
-            </label>
-            <label for="id_freq_3" class="inline-block border p-2 px-4">
-                <input type="radio" id="id_freq_3"
-                       onclick="showTab('#rec-years')"
-                       value="0" name="freq"/> Year(s)
-            </label>
-        </div>
-
-        <div id="rec-tabs-content"> {# ID used in add_event.html #}
-            <div id="rec-weeks" class="tab hidden">
-                {{ recurrence_form.week_days }}
+            {{ recurrence_form.interval.errors }}
+            <div>
+                Every {{ recurrence_form.interval }}
             </div>
-
-            <div id="rec-months" class="tab hidden">
-                <ul>
-                    <li>
-                        <label for="id_month_option_0">
-                            <input type="radio" id="id_month_option_0"
-                                   value="on" name="month_option"/>
-                            On the</label>
-                        {{ recurrence_form.month_ordinal }}
-                        {{ recurrence_form.month_ordinal_day }}
-                    </li>
-                    <li>
-                        <label for="id_month_option_1">
-                            <input checked="checked" type="radio"
-                                   id="id_month_option_1" value="each"
-                                   name="month_option"/> Each:</label>
-                        <br clear="all"/>
-                        <div class="horizontal form-indent">
-                            {{ recurrence_form.each_month_day }}
-                        </div>
-                    </li>
-                </ul>
-            </div>
-
-            <div id="rec-years" class="tab hidden ">
-                {{ recurrence_form.year_months }}
-                <label for="id_is_year_month_ordinal">
-                    {{ recurrence_form.is_year_month_ordinal }}
-                    On the
+            <div id="rec-tabs" class="border">
+                <label for="id_freq_0"
+                       class="border inline-block p-2 px-4"
+                >
+                    <input type="radio" id="id_freq_0"
+                           onclick="showTab(null)"
+                           value="3" name="freq"/> Day(s)
                 </label>
-                {{ recurrence_form.year_month_ordinal }}
-                {{ recurrence_form.year_month_ordinal_day }}
+
+                <label for="id_freq_1" class="inline-block border p-2 px-4">
+                    <input checked="checked" type="radio" id="id_freq_1"
+                           onclick="showTab('#rec-weeks')"
+                           value="2" name="freq"/> Week(s)
+                </label>
+
+                <label for="id_freq_2" class="inline-block border p-2 px-4">
+                    <input type="radio" id="id_freq_2"
+                           onclick="showTab('#rec-months')"
+                           value="1" name="freq"/> Month(s)
+                </label>
+                <label for="id_freq_3" class="inline-block border p-2 px-4">
+                    <input type="radio" id="id_freq_3"
+                           onclick="showTab('#rec-years')"
+                           value="0" name="freq"/> Year(s)
+                </label>
+            </div>
+
+            <div id="rec-tabs-content"> {# ID used in add_event.html #}
+                <div id="rec-weeks" class="tab hidden">
+                    {{ recurrence_form.week_days }}
+                </div>
+
+                <div id="rec-months" class="tab hidden">
+                    <ul>
+                        <li>
+                            <label for="id_month_option_0">
+                                <input type="radio" id="id_month_option_0"
+                                       value="on" name="month_option"/>
+                                On the</label>
+                            {{ recurrence_form.month_ordinal }}
+                            {{ recurrence_form.month_ordinal_day }}
+                        </li>
+                        <li>
+                            <label for="id_month_option_1">
+                                <input checked="checked" type="radio"
+                                       id="id_month_option_1" value="each"
+                                       name="month_option"/> Each:</label>
+                            <br clear="all"/>
+                            <div class="horizontal form-indent">
+                                {{ recurrence_form.each_month_day }}
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div id="rec-years" class="tab hidden ">
+                    {{ recurrence_form.year_months }}
+                    <label for="id_is_year_month_ordinal">
+                        {{ recurrence_form.is_year_month_ordinal }}
+                        On the
+                    </label>
+                    {{ recurrence_form.year_month_ordinal }}
+                    {{ recurrence_form.year_month_ordinal_day }}
+                </div>
             </div>
         </div>
     </td>
 </tr>
+
+<script>
+    let tabsItems = "#rec-tabs";
+    let tabsContent = '#rec-tabs-content';
+
+    function showTab(showNode) {
+        document.querySelectorAll(tabsContent + ' .tab').forEach((node) => node.classList.add('hidden'));
+        if (showNode) {
+            document.querySelector(tabsContent + ' ' + showNode).classList.remove('hidden');
+        }
+    }
+
+    window.addEventListener('load', function () {
+        // trigger showTab click event
+        document.querySelector(tabsItems + ' input:checked').click();
+    })
+</script>
 
 

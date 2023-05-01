@@ -1,16 +1,23 @@
 {% extends "base.html" %}
 {% block title %}Daily View{% endblock %}
 {% block content %}
-    <h3>Daily View</h3>
-    <p><em>Click a time from the Time column to add a new event...</em></p>
-    <h4>
-        <a class="plain"
+    <div>Click a time from the Time column to add a new event...</div>
+    <div class="nav p-2">
+        <a class="swing-button"
            href="{% url 'swingtime-daily-view' group.id prev_day.year prev_day.month prev_day.day %}">
             &larr;</a>
-        {{ day|date:"l, N jS Y" }}
-        <a class="plain"
+        <div class="border inline-block rounded px-2">
+            <form action="." method="post">
+                {% csrf_token %}
+                <input type="date" name="date" value="{{ day|date:"Y-m-d" }}"/>
+                <input type="submit" name="_goto" value="Go to" class="swing-button"/>
+            </form>
+
+        </div>
+        <a class="swing-button"
            href="{% url 'swingtime-daily-view' group.id next_day.year next_day.month next_day.day %}">&rarr;</a>
-    </h4>
+    </div>
+
     <table class="w-full">
         <thead>
         <tr>
@@ -22,7 +29,7 @@
         {% for tm,cells in timeslots %}
             <tr class="border">
                 <th class="center">
-                    <a href="{% url 'swingtime-add-event' group.id %}?dtstart={{ tm.isoformat }}">
+                    <a href="{% url 'swingtime-add-event' group.id %}?dtstart={{ tm|date:"Y-m-d\TH:i" }}">
                         {{ tm|date:"h:i a" }}
                     </a></th>
                 {% for cell in cells %}

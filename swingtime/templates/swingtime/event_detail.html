@@ -1,58 +1,96 @@
 {% extends "base.html" %}
 {% block title %}Event: {{ event }}{% endblock %}
 {% block content %}
-    <h4>Event Details</h4>
-    <form action="" method="post">{% csrf_token %}
-        {% include "swingtime/event_form_part.html" %}
-    </form>
 
-    {% comment %}
-        <h4>Notes</h4>
-        {% with event.notes.all as notes %}
-            {% if notes %}
-                <ul>
-                    {% for note in notes %}
-                        <li>{{ note }}</li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p>None</p>
-            {% endif %}
-        {% endwith %}
-    {% endcomment %}
+    <a
+            class="font-bold p-4"
+            href="{% url 'swingtime-monthly-view' group.id today.year today.month %}">
+        Back to Calendar
+    </a>
 
-    <h4>Occurrences</h4>
-    {% if event.occurrence_set.count %}
-        <ol>
-            {% for o in event.occurrence_set.all %}
-                <li>
-                    {% if o.start_time.date == o.end_time.date %}
-                        <a href="{% url 'swingtime-occurrence' group.id event.id o.id %}">
-                            {{ o.start_time|date:"l, F jS, Y" }} {{ o.start_time|date:"P" }} &ndash;
-                            {{ o.end_time|date:"P" }}</a>
-                    {% else %}
-                        <a href="{% url 'swingtime-occurrence' group.id event.id o.id %}">
-                            {{ o.start_time|date:"l, F jS, Y P" }} &ndash;
-                            {{ o.end_time|date:"l, F jS, Y P" }}</a>
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </ol>
-    {% endif %}
-
-    <h4>Add Occurrences</h4>
-    <form action="" method="post">{% csrf_token %}
+    <h3 class="text-center">Event Details</h3>
+    <form action="." method="post">
+        {% csrf_token %}
         <table>
-            <tfoot>
-            <tr>
-                <td colspan="2">
-                    <input type="submit" name="_add" value="Add" class="swing-button"/>
-                </td>
-            </tr>
-            </tfoot>
-            <tbody>
-            {% include "swingtime/recurring_form_part.html" %}
-            </tbody>
+            {{ event_form.as_table }}
         </table>
+        <div class="py-4">
+
+            <input type="submit" name="_save" value="Update"
+                   class="swing-button swing-button-primary"/>
+            <input type="submit" name="_delete" value="Delete"
+                   class="swing-button-danger swing-button"/>
+        </div>
     </form>
+
+    {% with event.notes.all as notes %}
+        {% if notes %}
+            <h4>Notes</h4>
+            <ul>
+                {% for note in notes %}
+                    <li>{{ note }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <h4 class="font-bold">Occurrences</h4>
+    <div class="max-h-56 overflow-y-scroll">
+        {% if event.occurrence_set.count %}
+            <table class="table-auto w-full">
+                <thead>
+                <tr class="font-bold">
+                    <td>Detail</td>
+                    <td>Weekday</td>
+                    <td>Date</td>
+                    <td>Timespan</td>
+                </tr>
+                </thead>
+                {% for o in event.occurrence_set.all %}
+                    <tr>
+                        <td class="font-bold">
+                            <a href="{% url 'swingtime-occurrence' group.id event.id o.id %}">
+                                See Detail
+                            </a>
+                        </td>
+                        <td>
+                            {{ o.start_time|date:"l" }}
+                        </td>
+                        <td class="font-monospace">
+                            {{ o.start_time|date:"d.m.Y" }}
+                        </td>
+                        <td>
+                            {% if o.start_time.date == o.end_time.date %}
+                                {{ o.start_time|date:"P" }} &ndash; {{ o.end_time|date:"P" }}
+                            {% else %}
+                                {{ o.start_time|date:"P" }} &ndash; {{ o.end_time|date:"d.m.Y P" }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+    </div>
+
+    <h4 class="py-4 font-bold">Add Occurrences</h4>
+    <div class="border rounded p-2">
+
+        <form action="." method="post">
+            {% csrf_token %}
+            <table>
+                <tfoot>
+                <tr>
+                    <td colspan="2">
+                        <input type="submit" name="_add" value="Add"
+                               class="swing-button swing-button-primary"/>
+                    </td>
+                </tr>
+                </tfoot>
+                <tbody>
+                {% include "swingtime/recurring_form_part.html" %}
+                </tbody>
+            </table>
+        </form>
+    </div>
+
 {% endblock %}

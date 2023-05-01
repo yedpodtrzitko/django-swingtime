@@ -4,20 +4,24 @@
 {% endblock %}
 
 {% block content %}
-    <h3>Monthly View</h3>
-    <p><em>Click a calendar date below to add a new event</em></p>
-    <h4>
-        <a class="plain"
-           href="{% url 'swingtime-monthly-view' group.id last_month.year last_month.month %}"
-           title="Last Month">&larr;</a>
-        {{ this_month|date:"F" }}
-        <a title="View {{ this_month.year }}"
-           href="{% url 'swingtime-yearly-view' group.id this_month.year %}">
-            {{ this_month|date:"Y" }}</a>
-        <a class="plain"
-           href="{% url 'swingtime-monthly-view' group.id next_month.year next_month.month %}"
-           title="Next Month">&rarr;</a>
-    </h4>
+    <h3 class="text-center font-bold">Monthly View</h3>
+    <a
+            class="swing-button"
+            href="{% url 'swingtime-monthly-view' group.id last_month.year last_month.month %}"
+            title="Previous Month">&larr;</a>
+
+    <div class="inline-block px-2 rounded">
+        <form action="." method="post">
+            {% csrf_token %}
+            <input type="date" name="date" value="{{ today|date:"Y-m-d" }}"/>
+            <input type="submit" name="_goto" value="Go to" class="swing-button"/>
+        </form>
+    </div>
+
+    <a
+            class="swing-button"
+            href="{% url 'swingtime-monthly-view' group.id next_month.year next_month.month %}"
+            title="Next Month">&rarr;</a>
     <table class="w-full text-center">
         <thead>
         <tr class="bg-gray-100">
