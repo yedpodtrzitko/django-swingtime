@@ -4,15 +4,15 @@ Common features and functions for swingtime
 import calendar
 import itertools
 from collections import defaultdict
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 
 from django.utils.safestring import mark_safe
 
 from .conf import swingtime_settings
-from .models import EventGroup, EventType, Occurrence
+from .models import EventType, Occurrence
 
 
-def time_delta_total_seconds(time_delta):
+def time_delta_total_seconds(time_delta) -> int:
     """
     Calculate the total number of seconds represented by a
     ``datetime.timedelta`` object
@@ -89,9 +89,9 @@ def create_timeslot_table(
     timezone,
     dt: datetime,
     # items=None,
-    start_time=swingtime_settings.TIMESLOT_START_TIME,
-    end_time_delta=swingtime_settings.TIMESLOT_END_TIME_DURATION,
-    time_delta=swingtime_settings.TIMESLOT_INTERVAL,
+    start_time: time = swingtime_settings.TIMESLOT_START_TIME,
+    end_time_delta: timedelta = swingtime_settings.TIMESLOT_END_TIME_DURATION,
+    time_delta: timedelta = swingtime_settings.TIMESLOT_INTERVAL,
     min_columns=swingtime_settings.TIMESLOT_MIN_COLUMNS,
     css_class_cycles=css_class_cycler,
     proxy_class=DefaultOccurrenceProxy,
@@ -128,7 +128,7 @@ def create_timeslot_table(
     items = Occurrence.objects.daily_occurrences(dt).select_related("event")
 
     # build a mapping of timeslot "buckets"
-    timeslots = {}
+    timeslots: dict = {}
     n = dtstart
     while n <= dtend:
         timeslots[n] = {}

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.contenttypes.admin import GenericTabularInline
 
-from swingtime.models import *
+from .models import Event, EventGroup, EventType, Note, Occurrence
 
 
 class EventTypeAdmin(admin.ModelAdmin):
@@ -25,5 +25,6 @@ class EventAdmin(admin.ModelAdmin):
     inlines = [EventNoteInline, OccurrenceInline]
 
 
+admin.site.register(EventGroup)
 admin.site.register(Event, EventAdmin)
 admin.site.register(EventType, EventTypeAdmin)

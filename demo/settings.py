@@ -53,7 +53,7 @@ TEMPLATES = [
 ALLOWED_HOSTS = ["*"]
 
 ROOT_URLCONF = "urls"
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -62,7 +62,7 @@ INSTALLED_APPS = (
     "django.contrib.staticfiles",
     "swingtime",
     "karate",
-)
+]
 
 MIDDLEWARE = (
     "django.middleware.security.SecurityMiddleware",
@@ -84,4 +84,4 @@ try:
 except ImportError:
     pass
 else:
-    INSTALLED_APPS += ("django_extensions",)
+    INSTALLED_APPS += ["django_extensions",]

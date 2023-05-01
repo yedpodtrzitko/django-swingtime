@@ -11,7 +11,7 @@ from django.utils.translation import gettext_lazy as _
 
 from . import utils
 from .conf import swingtime_settings
-from .models import *
+from .models import Event, Occurrence
 
 
 def get_days_order(first_days: int, days):
@@ -113,14 +113,14 @@ SECONDS_INTERVAL = utils.time_delta_total_seconds(
 
 def timeslot_options(
     interval=swingtime_settings.TIMESLOT_INTERVAL,
-    start_time=swingtime_settings.TIMESLOT_START_TIME,
-    end_delta=swingtime_settings.TIMESLOT_END_TIME_DURATION,
-    fmt=swingtime_settings.TIMESLOT_TIME_FORMAT,
+    start_time: time = swingtime_settings.TIMESLOT_START_TIME,
+    end_delta: timedelta = swingtime_settings.TIMESLOT_END_TIME_DURATION,
+    fmt: str = swingtime_settings.TIMESLOT_TIME_FORMAT,
 ):
     """
     Create a list of time slot options for use in swingtime forms.
 
-    The list is comprised of 2-tuples containing a 24-hour time value and a
+    The list is compromised of 2-tuples containing a 24-hour time value and a
     12-hour temporal representation of that offset.
 
     """
@@ -138,14 +138,14 @@ def timeslot_options(
 
 def timeslot_offset_options(
     interval=swingtime_settings.TIMESLOT_INTERVAL,
-    start_time=swingtime_settings.TIMESLOT_START_TIME,
-    end_delta=swingtime_settings.TIMESLOT_END_TIME_DURATION,
-    fmt=swingtime_settings.TIMESLOT_TIME_FORMAT,
+    start_time: time = swingtime_settings.TIMESLOT_START_TIME,
+    end_delta: timedelta = swingtime_settings.TIMESLOT_END_TIME_DURATION,
+    fmt: str = swingtime_settings.TIMESLOT_TIME_FORMAT,
 ):
     """
     Create a list of time slot options for use in swingtime forms.
 
-    The list is comprised of 2-tuples containing the number of seconds since the
+    The list is compromised of 2-tuples containing the number of seconds since the
     start of the day and a 12-hour temporal representation of that offset.
 
     """
@@ -389,11 +389,7 @@ class EventForm(forms.ModelForm):
 
     class Meta:
         model = Event
-        fields = "__all__"
-
-    def __init__(self, *args, **kws):
-        super().__init__(*args, **kws)
-        self.fields["description"].required = False
+        exclude = ("event_type",)
 
 
 class SingleOccurrenceForm(forms.ModelForm):

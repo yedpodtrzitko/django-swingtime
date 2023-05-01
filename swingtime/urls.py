@@ -4,7 +4,7 @@ from . import views
 
 urlpatterns = [
     re_path(
-        r"^today/(\d+)/$",
+        r"^calendar/(?P<gid>\d+)/today/$",
         views.today_view,
         name="swingtime-today",
     ),

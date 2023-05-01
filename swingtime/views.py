@@ -88,9 +88,9 @@ def event_view(
 
 def occurrence_view(
     request,
-    gid,
-    event_pk,
-    pk,
+    gid: int,
+    event_pk: int,
+    pk: int,
     template="swingtime/occurrence_detail.html",
     form_class=forms.SingleOccurrenceForm,
 ):
@@ -124,7 +124,7 @@ def occurrence_view(
 
 def add_event(
     request,
-    gid,
+    gid: int,
     template="swingtime/add_event.html",
     event_form_class=forms.EventForm,
     recurrence_form_class=forms.MultipleOccurrenceForm,
@@ -213,7 +213,13 @@ def _datetime_view(request, template: str, group: EventGroup, dt: datetime, **pa
 
 
 def day_view(
-    request, cid, year, month, day, template="swingtime/daily_view.html", **params
+    request,
+    cid: int,
+    year: int,
+    month: int,
+    day: int,
+    template="swingtime/daily_view.html",
+    **params
 ):
     """
     See documentation for function``_datetime_view``.
