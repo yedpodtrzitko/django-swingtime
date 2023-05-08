@@ -24,8 +24,9 @@
             {% for dt,occurrences in by_month %}
                 <tr class="month-divider">
                     <th rowspan="{{ occurrences|length }}">
-                        <a href="{% url 'swingtime-monthly-view' dt.year dt.month %}">
-                            {{ dt|date:"F" }}</a>
+                        <a href="{% url 'swingtime-monthly-view' group.id dt.year dt.month %}">
+                            {{ dt|date:"F" }}
+                        </a>
                     </th>
                     {% for o in occurrences %}
                         <td><a href="{{ o.get_absolute_url }}">{{ o.title }}</a></td>

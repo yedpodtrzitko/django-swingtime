@@ -7,9 +7,9 @@ isort:
 mypy:
 	mypy . --install-types
 
-tests:
-	DJANGO_SETTINGS_MODULE="demo.settings" python -m pytest ./tests -svx
+test:
+	DJANGO_SETTINGS_MODULE="demo.settings" python -m pytest ./tests -sv
 
 format: black isort
 
-.PHONY: tests format
+.PHONY: test format

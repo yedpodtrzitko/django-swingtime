@@ -162,7 +162,7 @@ class TestNewEventForm:
             until=datetime(2015, 6, 10),
         )
         mof = MultipleOccurrenceForm(data, initial={"dtstart": dtstart})
-        assert True == mof.is_valid()
+        assert mof.is_valid()
 
         mof.save(e)
         expected = [date(2015, m, d) for m, d in ((3, 6), (4, 3), (5, 1), (6, 5))]
@@ -244,7 +244,7 @@ class TestCreation:
             byweekday=(rrule.TU, rrule.TH),
             until=datetime(2008, 12, 31),
         )
-        assert True == isinstance(e.event_type, EventType)
+        assert isinstance(e.event_type, EventType)
         assert e.event_type.abbr == "abbr"
         assert str(e.notes.all()[0]) == "Here it is"
         occs = list(e.occurrence_set.all())
@@ -303,14 +303,14 @@ class TestViews:
         r = client.get(reverse("swingtime-today", args=[group_default().id]))
         assert r.status_code == 200
 
-    def test_year(self, client, group_default):
+    def test_year(self, client, group_default, occurrence):
         # r'^calendar/(?P<year>\d{4})/$', views.year_view
         r = client.get(
             reverse("swingtime-yearly-view", args=[group_default().id, 2018])
         )
         assert r.status_code == 200
 
-    def test_month(self, client, group_default, occurence):
+    def test_month(self, client, group_default, occurrence):
         # r'^calendar/(\d{4})/(0?[1-9]|1[012])/$', views.month_view
         url = reverse("swingtime-monthly-view", args=[group_default().id, 2018, 3])
         r = client.get(url)
@@ -346,28 +346,28 @@ class TestViews:
         r = client.post(reverse("swingtime-add-event", args=[group_default().id]))
         assert r.status_code == 200
 
-    def test_event_view(self, client, occurence, group_default):
+    def test_event_view(self, client, occurrence, group_default):
         # r'^events/(\d+)/$', views.event_view
         r = client.get(
-            reverse("swingtime-event", args=[group_default().id, occurence.event.id])
+            reverse("swingtime-event", args=[group_default().id, occurrence.event.id])
         )
         assert r.status_code == 200
 
         r = client.post(
-            reverse("swingtime-event", args=[group_default().id, occurence.event.id]),
-            model_to_dict(occurence.event),
+            reverse("swingtime-event", args=[group_default().id, occurrence.event.id]),
+            model_to_dict(occurrence.event),
         )
         assert r.status_code == 400
 
         r = client.post(
-            reverse("swingtime-event", args=[group_default().id, occurence.event.id]),
-            dict(model_to_dict(occurence.event), _update=""),
+            reverse("swingtime-event", args=[group_default().id, occurrence.event.id]),
+            dict(model_to_dict(occurrence.event), _update=""),
         )
         assert r.status_code == 302
 
         r = client.post(
-            reverse("swingtime-event", args=[group_default().id, occurence.event.id]),
-            dict(model_to_dict(occurence.event), _add=""),
+            reverse("swingtime-event", args=[group_default().id, occurrence.event.id]),
+            dict(model_to_dict(occurrence.event), _add=""),
         )
         assert r.status_code == 200
 
@@ -375,14 +375,14 @@ class TestViews:
         r = client.get(
             reverse(
                 "swingtime-occurrence",
-                args=[group_default().id, occurence.event.id, occurence.id],
+                args=[group_default().id, occurrence.event.id, occurrence.id],
             )
         )
         assert r.status_code == 200
 
         # r'^events/(\d+)/(\d+)/$', views.occurrence_view
-        start = occurence.start_time
-        end = occurence.end_time
+        start = occurrence.start_time
+        end = occurrence.end_time
 
         data = {
             "start_time": start.isoformat(),
@@ -392,7 +392,7 @@ class TestViews:
         r = client.post(
             reverse(
                 "swingtime-occurrence",
-                args=[group_default().id, occurence.event.id, occurence.id],
+                args=[group_default().id, occurrence.event.id, occurrence.id],
             ),
             data,
         )

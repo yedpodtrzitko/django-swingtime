@@ -34,7 +34,7 @@ def play_type():
 
 
 @pytest.fixture
-def occurence(work_type, group_default):
+def occurrence(work_type, group_default):
     e = Event.objects.create(
         event_type=work_type,
         title="event",
