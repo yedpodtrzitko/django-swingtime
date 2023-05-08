@@ -291,6 +291,10 @@ def year_view(
 
     """
     group = get_object_or_404(EventGroup, pk=int(gid))
+    if request.method == "POST" and request.POST.get("date"):
+        sent = parser.parse(request.POST["date"])
+        year = sent.year
+        return redirect(reverse("swingtime-yearly-view", args=[group.id, year]))
 
     year = int(year)
     queryset = (

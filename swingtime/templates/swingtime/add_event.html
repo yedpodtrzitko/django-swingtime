@@ -2,7 +2,7 @@
 {% block title %}Add Event{% endblock %}
 
 {% block content %}
-    <h3 class="text-center text-xl">Add Event</h3>
+    <h3 class="swing-title">Add Event</h3>
 
     {{ event_form.non_field_errors }}
     {{ recurring_form.non_field_errors }}
@@ -17,7 +17,7 @@
             {% include "swingtime/recurring_form_part.html" %}
         </table>
 
-        <input class="swing-button swing-button-primary" type="submit" value="Submit"/>
+        <input class="swing-button swing-button-primary" type="submit" value="Add Event"/>
     </form>
 
 {% endblock %}
