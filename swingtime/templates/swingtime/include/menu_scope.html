@@ -1,0 +1,10 @@
+<div>
+    {% for link_scope, url, label in scope_menu %}
+        <div class="inline-block">
+            <a class="swing-button {% if scope_id == link_scope %} swing-active{% endif %}"
+               href="{{ url }}">
+                {{ label }}
+            </a>
+        </div>
+    {% endfor %}
+</div>

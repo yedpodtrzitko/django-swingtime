@@ -2,6 +2,8 @@ import calendar
 import itertools
 import logging
 from datetime import date, datetime, timedelta
+from enum import Enum
+from typing import List, Tuple
 
 from dateutil import parser
 from django import http
@@ -9,6 +11,7 @@ from django.db import models
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.module_loading import import_string
+from django.utils.translation import gettext_lazy as _
 
 from . import forms, utils
 from .conf import swingtime_settings
@@ -229,6 +232,8 @@ def _datetime_view(request, template: str, group: EventGroup, dt: datetime, **pa
             "next_day": dt + timedelta(days=+1),
             "prev_day": dt + timedelta(days=-1),
             "timeslots": utils.create_timeslot_table(group.timezone, dt, **params),
+            "scope_id": ScopeEnum.DAY,
+            "scope_menu": get_scope_menu(group.id, dt),
         },
     )
 
@@ -267,9 +272,7 @@ def today_view(request, gid: int, template="swingtime/daily_view.html", **params
     return _datetime_view(request, template, group, dt, **params)
 
 
-def year_view(
-    request, gid: int, year: int, template="swingtime/yearly_view.html", queryset=None
-):
+def year_view(request, gid: int, year: int, template="swingtime/yearly_view.html"):
     """
 
     Context parameters:
@@ -297,12 +300,7 @@ def year_view(
         return redirect(reverse("swingtime-yearly-view", args=[group.id, year]))
 
     year = int(year)
-    queryset = (
-        queryset._clone()
-        if queryset is not None
-        else Occurrence.objects.select_related()
-    )
-    occurrences = queryset.filter(
+    occurrences = Occurrence.objects.filter(
         models.Q(start_time__year=year) | models.Q(end_time__year=year)
     )
 
@@ -324,8 +322,36 @@ def year_view(
             ],
             "next_year": year + 1,
             "last_year": year - 1,
+            "scope_menu": get_scope_menu(gid, datetime(year, 1, 1)),
+            "scope_id": ScopeEnum.YEAR,
         },
     )
+
+
+class ScopeEnum(str, Enum):
+    YEAR = "year"
+    MONTH = "month"
+    DAY = "day"
+
+
+def get_scope_menu(gid: int, dt: datetime) -> List[Tuple[str, str, str]]:
+    return [
+        (
+            ScopeEnum.YEAR,
+            reverse("swingtime-yearly-view", args=[gid, dt.year]),
+            _("Yearly View"),
+        ),
+        (
+            ScopeEnum.MONTH,
+            reverse("swingtime-monthly-view", args=[gid, dt.year, dt.month]),
+            _("Montly View"),
+        ),
+        (
+            ScopeEnum.DAY,
+            reverse("swingtime-daily-view", args=[gid, dt.year, dt.month, dt.day]),
+            _("Daily View"),
+        ),
+    ]
 
 
 def month_view(
@@ -388,6 +414,8 @@ def month_view(
         "next_month": dtstart + timedelta(days=+last_day),
         "last_month": dtstart + timedelta(days=-1),
         "week_days": [x for (_, x) in WEEKDAY_SHORT],
+        "scope_menu": get_scope_menu(gid, dtstart),
+        "scope_id": ScopeEnum.MONTH,
     }
 
     return render(request, template, data)

@@ -165,10 +165,14 @@ class Occurrence(models.Model):
     object.
     """
 
-    start_time = models.DateTimeField(_("start time"))
-    end_time = models.DateTimeField(_("end time"))
+    start_time = models.DateTimeField(_("start time"), db_index=True)
+    end_time = models.DateTimeField(_("end time"), db_index=True)
     event = models.ForeignKey(
-        Event, verbose_name=_("event"), editable=False, on_delete=models.CASCADE
+        Event,
+        verbose_name=_("event"),
+        editable=False,
+        on_delete=models.CASCADE,
+        db_index=True,
     )
     notes = GenericRelation(Note, verbose_name=_("notes"))
 

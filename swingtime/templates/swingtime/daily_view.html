@@ -1,25 +1,30 @@
 {% extends "base.html" %}
 {% block title %}Daily View{% endblock %}
 {% block content %}
-    <h3 class="swing-title">Daily View</h3>
 
-    <div class="nav p-2">
-        <a class="swing-button"
-           href="{% url 'swingtime-daily-view' group.id prev_day.year prev_day.month prev_day.day %}">
-            &larr; {{ prev_day|date:"d.m.Y" }}
-        </a>
-        <div class="border inline-block rounded px-2">
-            <form action="." method="post">
-                {% csrf_token %}
-                <input type="date" name="date" value="{{ day|date:"Y-m-d" }}"/>
-                <input type="submit" name="_goto" value="Go to" class="swing-button"/>
-            </form>
+    <div class="text-center">
 
+        {% include "swingtime/include/menu_scope.html" %}
+
+        <div class="nav p-2">
+            <a class="swing-button"
+               href="{% url 'swingtime-daily-view' group.id prev_day.year prev_day.month prev_day.day %}">
+                &larr; {{ prev_day|date:"d.m.Y" }}
+            </a>
+            <div class="border inline-block rounded px-2">
+                <form action="." method="post">
+                    {% csrf_token %}
+                    <input type="date" name="date" value="{{ day|date:"Y-m-d" }}"/>
+                    <input type="submit" name="_goto" value="Go to" class="swing-button"/>
+                </form>
+
+            </div>
+            <a class="swing-button"
+               href="{% url 'swingtime-daily-view' group.id next_day.year next_day.month next_day.day %}">
+                {{ next_day|date:"d.m.Y" }} &rarr;
+            </a>
         </div>
-        <a class="swing-button"
-           href="{% url 'swingtime-daily-view' group.id next_day.year next_day.month next_day.day %}">
-            {{ next_day|date:"d.m.Y" }} &rarr;
-        </a>
+
     </div>
 
     <table class="w-full">
