@@ -38,15 +38,19 @@
         {% for tm,cells in timeslots %}
             <tr class="even:bg-gray-100">
                 <th class="center">
-                    <a href="{% url 'swingtime-add-event' group.id %}?dtstart={{ tm|date:"Y-m-d\TH:i" }}">
+                    <a class="swing-button-style p-1 my-1 font-mono inline-block"
+                       href="{% url 'swingtime-add-event' group.id %}?dtstart={{ tm|date:"Y-m-d\TH:i" }}">
                         {{ tm|date:"h:i a" }}
                     </a>
                 </th>
                 {% for occ in cells %}
                     <td>
-                        <a href="{{ occ.get_absolute_url }}">
-                            {{ occ.title }}
-                        </a>
+                        {% if occ %}
+                            <a class="swing-button block"
+                               href="{{ occ.get_absolute_url }}">
+                                {{ occ.title }}
+                            </a>
+                        {% endif %}
                     </td>
                 {% endfor %}
             </tr>

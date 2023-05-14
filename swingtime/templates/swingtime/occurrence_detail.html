@@ -1,11 +1,16 @@
 {% extends "base.html" %}
 {% block title %}Event Occurrence{% endblock %}
 {% block content %}
-    <h3 class="swing-title">
-        Event Occurrence
-    </h3>
 
-    <div>
+    <div class="text-center">
+        {% include "swingtime/include/menu_scope.html" %}
+    </div>
+
+    <div class="py-4 text-center font-bold">
+        Occurrence Details
+    </div>
+
+    <div class="pb-4">
         <div class="inline-block w-40 font-bold">
             Event
         </div>
@@ -14,22 +19,6 @@
             {{ occurrence.title }}
         </a>
 
-    </div>
-    <div>
-        {% with occurrence.start_time as st %}
-            <div class="inline-block w-40 font-bold">
-                Occurrence
-            </div>
-
-            <a class="swing-button my-2"
-               href="{% url 'swingtime-daily-view' group.id st.year st.month st.day %}">
-                {{ st|date:"l, F jS P" }}
-            </a>
-        {% endwith %}
-    </div>
-
-    <div class="py-4 text-center font-bold">
-        Occurrence Details
     </div>
 
     <form action="" method="post">

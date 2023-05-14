@@ -164,7 +164,14 @@ def occurrence_view(
         form = form_class(instance=occurrence)
 
     return render(
-        request, template, {"group": group, "occurrence": occurrence, "form": form}
+        request,
+        template,
+        {
+            "scope_menu": get_scope_menu(group.id, occurrence.start_time),
+            "group": group,
+            "occurrence": occurrence,
+            "form": form,
+        },
     )
 
 
@@ -336,6 +343,7 @@ def year_view(request, gid: int, year: int, template="swingtime/yearly_view.html
         request,
         template,
         {
+            "today": date(year, 1, 1),
             "group": group,
             "year": year,
             "by_month": [

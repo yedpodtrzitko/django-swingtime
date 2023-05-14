@@ -6,35 +6,29 @@
         {% include "swingtime/include/menu_scope.html" %}
     </div>
 
-    <h3 class="swing-title">Event Detail</h3>
+    <h3 class="swing-title">Event Details</h3>
 
     <form action="." method="post">
         {% csrf_token %}
-        <table>
-            {{ event_form.as_table }}
-        </table>
-        <div class="py-4">
-
-            <input type="submit" name="_save" value="Update"
+        <div class="border rounded bg-gray-50 p-4">
+            <table>
+                {{ event_form.as_table }}
+            </table>
+            <div class="h-4"></div>
+            <input type="submit" name="_save" value="Update Details"
                    class="swing-button swing-button-primary"/>
-            <input type="submit" name="_delete" value="Delete"
+        </div>
+        <div class="my-2 border rounded bg-gray-50 p-4">
+            <div class="py-2">Remove Event and all its occurrences</div>
+            <input type="submit" name="_delete" value="Delete Event"
                    class="swing-button-danger swing-button"/>
         </div>
+
+
     </form>
 
-    {% with event.notes.all as notes %}
-        {% if notes %}
-            <h4>Notes</h4>
-            <ul>
-                {% for note in notes %}
-                    <li>{{ note }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-
     <h3 class="swing-title">
-        Current Occurrences
+        Event Occurrences
     </h3>
 
     <div class="max-h-56 overflow-y-scroll border">

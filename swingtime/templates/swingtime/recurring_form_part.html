@@ -35,7 +35,7 @@
     </td>
 </tr>
 
-<tr>
+<tr id="tr_frequency">
     <th class="align-top">{{ recurrence_form.freq.label_tag }}</th>
     <td>
         <div class="p-4">
@@ -115,19 +115,40 @@
 <tr style="display: block">
     <td colspan="2">
         <script>
-            let tabsItems = "#rec-tabs";
-            let tabsContent = '#rec-tabs-content';
+            let selTabsItems = "#rec-tabs";
+            let selTabsContent = '#rec-tabs-content';
+            let selRadioRepeatCount = '#id_repeats_0';
+            let selInputRepeatCount = '#id_count';
+            let inputRepeatCount = '#id_count';
+            let selTRFrequency = '#tr_frequency';
 
             function showTab(showNode) {
-                document.querySelectorAll(tabsContent + ' .tab').forEach((node) => node.classList.add('hidden'));
+                document.querySelectorAll(selTabsContent + ' .tab').forEach((node) => node.classList.add('hidden'));
                 if (showNode) {
-                    document.querySelector(tabsContent + ' ' + showNode).classList.remove('hidden');
+                    document.querySelector(selTabsContent + ' ' + showNode).classList.remove('hidden');
                 }
             }
 
+
             window.addEventListener('load', function () {
+                // show/hide recurrence content as needed
+                /*
+                function toggleFrequency(visible) {
+                    document.querySelector(selTRFrequency).style.display = visible ? 'block' : 'none';
+                }
+
+                let radioCount = document.querySelector(selRadioRepeatCount);
+                let inputCount = document.querySelector(selInputRepeatCount);
+                let trFreq = document.querySelector(selTRFrequency);
+                inputCount.addEventListener('change', function () {
+                    if (inputCount.value > 1) {
+                        toggleFrequency(true);
+                    }
+                });
+                */
+
                 // trigger showTab click event
-                document.querySelector(tabsItems + ' input:checked').click();
+                document.querySelector(selTabsItems + ' input:checked').click();
             })
         </script>
     </td>
