@@ -2,15 +2,11 @@
 {% block title %}Event: {{ event }}{% endblock %}
 {% block content %}
 
-    <h3 class="swing-title">Event Details</h3>
-
-    <div class="py-4">
-
-        <a class="swing-button"
-           href="{% url 'swingtime-monthly-view' group.id today.year today.month %}">
-            &larr; Back to Calendar
-        </a>
+    <div class="text-center">
+        {% include "swingtime/include/menu_scope.html" %}
     </div>
+
+    <h3 class="swing-title">Event Detail</h3>
 
     <form action="." method="post">
         {% csrf_token %}
@@ -37,10 +33,12 @@
         {% endif %}
     {% endwith %}
 
-    <h3 class="swing-title">Current Occurrences</h3>
+    <h3 class="swing-title">
+        Current Occurrences
+    </h3>
 
     <div class="max-h-56 overflow-y-scroll border">
-        {% if event.occurrence_set.count %}
+        {% if occurrences %}
             <table class="table-auto w-full">
                 <thead>
                 <tr class="font-bold swing-accent">
@@ -50,7 +48,7 @@
                     <td>Timespan</td>
                 </tr>
                 </thead>
-                {% for o in event.occurrence_set.all %}
+                {% for o in occurrences %}
                     <tr class="even:bg-gray-100">
                         <td class="font-bold">
                             <a href="{% url 'swingtime-occurrence' group.id event.id o.id %}">
@@ -76,7 +74,7 @@
         {% endif %}
     </div>
 
-    <h4 class="swing-title pt-8">Add Occurrences</h4>
+    <h4 class="swing-title pt-8">Add More Occurrences</h4>
     <div class="border rounded p-2 bg-gray-50">
         <form action="." method="post">
             {% csrf_token %}

@@ -112,22 +112,25 @@
         </div>
     </td>
 </tr>
+<tr style="display: block">
+    <td colspan="2">
+        <script>
+            let tabsItems = "#rec-tabs";
+            let tabsContent = '#rec-tabs-content';
 
-<script>
-    let tabsItems = "#rec-tabs";
-    let tabsContent = '#rec-tabs-content';
+            function showTab(showNode) {
+                document.querySelectorAll(tabsContent + ' .tab').forEach((node) => node.classList.add('hidden'));
+                if (showNode) {
+                    document.querySelector(tabsContent + ' ' + showNode).classList.remove('hidden');
+                }
+            }
 
-    function showTab(showNode) {
-        document.querySelectorAll(tabsContent + ' .tab').forEach((node) => node.classList.add('hidden'));
-        if (showNode) {
-            document.querySelector(tabsContent + ' ' + showNode).classList.remove('hidden');
-        }
-    }
+            window.addEventListener('load', function () {
+                // trigger showTab click event
+                document.querySelector(tabsItems + ' input:checked').click();
+            })
+        </script>
+    </td>
 
-    window.addEventListener('load', function () {
-        // trigger showTab click event
-        document.querySelector(tabsItems + ' input:checked').click();
-    })
-</script>
-
+</tr>
 

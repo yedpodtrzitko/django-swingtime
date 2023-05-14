@@ -5,47 +5,61 @@
         Event Occurrence
     </h3>
 
-    <div class="block font-bold">
+    <div>
+        <div class="inline-block w-40 font-bold">
+            Event
+        </div>
         <a href="{{ occurrence.event.get_absolute_url }}"
-           class="swing-button"
-        >
-            Event: "{{ occurrence.title }}"
+           class="swing-button">
+            {{ occurrence.title }}
         </a>
+
+    </div>
+    <div>
+        {% with occurrence.start_time as st %}
+            <div class="inline-block w-40 font-bold">
+                Occurrence
+            </div>
+
+            <a class="swing-button my-2"
+               href="{% url 'swingtime-daily-view' group.id st.year st.month st.day %}">
+                {{ st|date:"l, F jS P" }}
+            </a>
+        {% endwith %}
     </div>
 
-    {% with occurrence.start_time as st %}
-        <a
-                class="swing-button my-2"
-                href="{% url 'swingtime-daily-view' group.id st.year st.month st.day %}">
-            Occurrence: {{ st|date:"l, F jS P" }}
-        </a>
-    {% endwith %}
-
-    {% with occurrence.event.notes.all as notes %}
-        {% if notes %}
-            <dt>Note(s:)</dt>
-            <ul>
-                {% for note in notes %}
-                    <li>{{ note }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
+    <div class="py-4 text-center font-bold">
+        Occurrence Details
+    </div>
 
     <form action="" method="post">
         {% csrf_token %}
-        <table>
-            <tfoot>
-            <tr>
-                <td colspan="2">
-                    <input type="submit" class="swing-button-primary swing-button" value="Update"/>
-                </td>
-            </tr>
-            </tfoot>
-            <tbody>
-            {{ form }}
-            </tbody>
-        </table>
+        <div>
+            <div class="inline-block w-40 font-bold">
+                Start Time
+            </div>
+            {{ form.start_time }}
+        </div>
+        <div>
+            <div class="inline-block w-40 font-bold">
+                End Time
+            </div>
+            {{ form.end_time }}
+        </div>
+
+        <div class="pt-4">
+
+            <input type="submit"
+                   name="_update"
+                   class="swing-button-primary swing-button"
+                   value="Update Time"/>
+
+            <input type="submit"
+                   name="_delete"
+                   class="swing-button-danger swing-button"
+                   value="Remove Occurrence"/>
+        </div>
+
     </form>
 
 {% endblock %}

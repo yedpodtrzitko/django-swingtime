@@ -101,12 +101,19 @@ def event_view(
         else:
             return http.HttpResponseBadRequest("Bad Request")
 
+    occurrences = event.occurrence_set.all()
+    nav_date = datetime.now(tz=group.timezone)
+    if occurrences:
+        nav_date = occurrences[0].start_time.date()
+
     data = {
         "today": date.today(),
         "group": event.group,
         "event": event,
+        "occurrences": occurrences,
         "event_form": event_form,
         "recurrence_form": recurrence_form,
+        "scope_menu": get_scope_menu(group.id, nav_date),
     }
     return render(request, template, data)
 
@@ -135,10 +142,24 @@ def occurrence_view(
     assert group.id == int(gid)
 
     if request.method == "POST":
+        if "_delete" in request.POST:
+            st = occurrence.start_time
+            occurrence.delete()
+            return http.HttpResponseRedirect(
+                reverse(
+                    "swingtime-daily-view", args=[group.id, st.year, st.month, st.day]
+                )
+            )
+
         form = form_class(request.POST, instance=occurrence)
         if form.is_valid():
             form.save()
-            return http.HttpResponseRedirect(request.path)
+            st = occurrence.start_time
+            return http.HttpResponseRedirect(
+                reverse(
+                    "swingtime-daily-view", args=[group.id, st.year, st.month, st.day]
+                )
+            )
     else:
         form = form_class(instance=occurrence)
 

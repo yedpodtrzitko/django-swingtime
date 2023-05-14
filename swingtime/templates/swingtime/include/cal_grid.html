@@ -5,17 +5,25 @@
 
     {% for row in calendar_data %}
         {% for day,items in row %}
-            <div class="border">
+            <div class="border{% if day == today.day %} today{% endif %}">
                 {% if day %}
-                    {{ day }}
+                    <div class="text-center font-bold m-1">
+                        <a title="see day detail"
+                           class="inline-block border w-full bg-gray-300 hover:bg-gray-400"
+                           href="{% url 'swingtime-daily-view' group.id this_month.year this_month.month day %}">
+                            {{ day }}
+                        </a>
+                    </div>
+                    {% for item in items %}
+                        <a href="{{ item.get_absolute_url }}"
+                           class="block border p-1 m-1 bg-gray-100 rounded hover:bg-gray-200">
+                            <span class="event-times">{{ item.start_time|time }}</span>
+                            {{ item.title }}
+                        </a>
+                        {% empty %}
+                        <div class="h-20"></div>
+                    {% endfor %}
                 {% endif %}
-                {% for item in items %}
-                    <a href="{{ item.get_absolute_url }}"
-                       class="block border p-1 m-1 bg-gray-100 rounded hover:bg-gray-200">
-                        <span class="event-times">{{ item.start_time|time }}</span>
-                        {{ item.title }}
-                    </a>
-                {% endfor %}
             </div>
         {% endfor %}
     {% endfor %}

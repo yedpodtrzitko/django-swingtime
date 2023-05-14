@@ -333,11 +333,11 @@ class MultipleOccurrenceForm(forms.Form):
                 seconds=self.cleaned_data["end_time_delta"]
             )
 
-            if until := self.cleaned_data.get("until"):
-                if until < day.date():
-                    raise ValueError(
-                        "Until date must be further in future than start date"
-                    )
+            if (
+                self.cleaned_data["repeats"] == "until"
+                and self.cleaned_data["until"] < day.date()
+            ):
+                raise ValueError("Until date must be further in future than start date")
 
         return self.cleaned_data
 
