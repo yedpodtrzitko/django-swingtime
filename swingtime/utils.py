@@ -4,7 +4,7 @@ Common features and functions for swingtime
 import calendar
 import itertools
 from collections import defaultdict
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, tzinfo
 
 from django.utils.safestring import mark_safe
 
@@ -53,49 +53,14 @@ def css_class_cycler():
     )
 
 
-class BaseOccurrenceProxy(object):
-    """
-    A simple wrapper class for handling the presentational aspects of an
-    ``Occurrence`` instance.
-
-    """
-
-    def __init__(self, occurrence, col):
-        self.column = col
-        self._occurrence = occurrence
-        self.event_class = ""
-
-    def __getattr__(self, name):
-        return getattr(self._occurrence, name)
-
-    def __str__(self):
-        return self.title
-
-
-class DefaultOccurrenceProxy(BaseOccurrenceProxy):
-    CONTINUATION_STRING = "^^"
-
-    def __init__(self, *args, **kws):
-        super().__init__(*args, **kws)
-        link = '<a href="%s">%s</a>' % (self.get_absolute_url(), self.title)
-
-        self._str = itertools.chain((link,), itertools.repeat(self.CONTINUATION_STRING))
-
-    def __str__(self):
-        return mark_safe(next(self._str))
-
-
 def create_timeslot_table(
-    timezone,
+    timezone: tzinfo,
     dt: datetime,
-    # items=None,
     start_time: time = swingtime_settings.TIMESLOT_START_TIME,
     end_time_delta: timedelta = swingtime_settings.TIMESLOT_END_TIME_DURATION,
     time_delta: timedelta = swingtime_settings.TIMESLOT_INTERVAL,
     min_columns=swingtime_settings.TIMESLOT_MIN_COLUMNS,
-    css_class_cycles=css_class_cycler,
-    proxy_class=DefaultOccurrenceProxy,
-):
+) -> list:
     """
     Create a grid-like object representing a sequence of times (rows) and
     columns where cells are either empty or reference a wrapper object for
@@ -106,15 +71,10 @@ def create_timeslot_table(
     also match an interval in the sequence of the computed row entries.
 
     * ``dt`` - a ``datetime.datetime`` instance
-    * ``items`` - a queryset or sequence of ``Occurrence`` instances. If
-      ``None``, default to the daily occurrences for ``dt``
     * ``start_time`` - a ``datetime.time`` instance
     * ``end_time_delta`` - a ``datetime.timedelta`` instance
     * ``time_delta`` - a ``datetime.timedelta`` instance
     * ``min_column`` - the minimum number of columns to show in the table
-    * ``css_class_cycles`` - if not ``None``, a callable returning a dictionary
-      keyed by desired ``EventType`` abbreviations with values that iterate over
-      progressive CSS class names for the particular abbreviation.
     * ``proxy_class`` - a wrapper class for accessing an ``Occurrence`` object.
       This class should also expose ``event_type`` and ``event_type`` attrs, and
       handle the custom output via its __unicode__ method.
@@ -147,7 +107,7 @@ def create_timeslot_table(
         else:
             rowkey = current = dtstart
 
-        timeslot = timeslots.get(rowkey, None)
+        timeslot = timeslots.get(rowkey)
         if timeslot is None:
             # TODO fix atypical interval boundary spans
             # This is rather draconian, we should probably try to find a better
@@ -160,19 +120,18 @@ def create_timeslot_table(
         while 1:
             # keep searching for an open column to place this occurrence
             if colkey not in timeslot:
-                proxy = proxy_class(item, colkey)
-                timeslot[colkey] = proxy
+                timeslot[colkey] = item
 
                 while current < item.end_time:
                     rowkey = current
-                    row = timeslots.get(rowkey, None)
+                    row = timeslots.get(rowkey)
                     if row is None:
                         break
 
                     # we might want to put a sanity check in here to ensure that
                     # we aren't trampling some other entry, but by virtue of
                     # sorting all occurrence that shouldn't happen
-                    row[colkey] = proxy
+                    row[colkey] = item
                     current += time_delta
                 break
 
@@ -181,23 +140,14 @@ def create_timeslot_table(
     # determine the number of timeslot columns we should show
     column_lens = [len(x) for x in timeslots.values()]
     column_count = max((min_columns, max(column_lens) if column_lens else 0))
-    column_range = range(column_count)
-    empty_columns = ["" for x in column_range]
-
-    if css_class_cycles:
-        column_classes = dict([(i, css_class_cycles()) for i in column_range])
-    else:
-        column_classes = None
+    empty_columns = [""] * column_count
 
     # create the chronological grid layout
     table = []
     for rowkey in sorted(timeslots.keys()):
         cols = empty_columns[:]
         for colkey in timeslots[rowkey]:
-            proxy = timeslots[rowkey][colkey]
-            cols[colkey] = proxy
-            if not proxy.event_class and column_classes:
-                pass  # proxy.event_class = next(column_classes[colkey][proxy.event_type.abbr])
+            cols[colkey] = timeslots[rowkey][colkey]
 
         table.append((rowkey, cols))
 

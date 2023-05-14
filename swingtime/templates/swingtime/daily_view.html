@@ -40,9 +40,14 @@
                 <th class="center">
                     <a href="{% url 'swingtime-add-event' group.id %}?dtstart={{ tm|date:"Y-m-d\TH:i" }}">
                         {{ tm|date:"h:i a" }}
-                    </a></th>
-                {% for cell in cells %}
-                    <td{% if cell.event_class %} class="{{ cell.event_class }}"{% endif %}>{{ cell }}</td>
+                    </a>
+                </th>
+                {% for occ in cells %}
+                    <td>
+                        <a href="{{ occ.get_absolute_url }}">
+                            {{ occ.title }}
+                        </a>
+                    </td>
                 {% endfor %}
             </tr>
         {% endfor %}

@@ -190,7 +190,7 @@ class Occurrence(models.Model):
     def get_absolute_url(self):
         return reverse(
             "swingtime-occurrence",
-            args=[self.event.group_id, str(self.event.id), str(self.id)],
+            args=[self.event.group_id, self.event.id, self.id],
         )
 
     def __lt__(self, other):
