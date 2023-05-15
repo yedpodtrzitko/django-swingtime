@@ -17,7 +17,7 @@
             <form action="." method="post">
                 {% csrf_token %}
                 <input type="date" name="date" value="{{ this_month|date:"Y-m-d" }}"/>
-                <input type="submit" name="_goto" value="Go to" class="swing-button"/>
+                <input type="submit" name="_goto" value="Go to selected" class="swing-button"/>
             </form>
         </div>
 

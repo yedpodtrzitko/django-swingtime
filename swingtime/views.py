@@ -69,11 +69,6 @@ def event_view(
     ``event``
         the event keyed by ``pk``
 
-    ``event_form``
-        a form object for updating the event
-
-    ``recurrence_form``
-        a form object for adding occurrences
     """
 
     event = get_object_or_404(Event, pk=int(pk), group_id=int(gid))
