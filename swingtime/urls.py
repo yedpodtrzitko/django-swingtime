@@ -11,17 +11,17 @@ urlpatterns = [
     re_path(
         r"^calendar/(?P<gid>\d+)/(?P<year>\d{4})/$",
         views.year_view,
-        name="swingtime-yearly-view",
+        name="swingtime-year",
     ),
     re_path(
         r"^calendar/(?P<gid>\d+)/(?P<year>\d{4})/(?P<month>0?[1-9]|1[012])/$",
         views.month_view,
-        name="swingtime-monthly-view",
+        name="swingtime-month",
     ),
     re_path(
         r"^calendar/(\d+)/(\d{4})/(0?[1-9]|1[012])/([0-3]?\d)/$",
         views.day_view,
-        name="swingtime-daily-view",
+        name="swingtime-day",
     ),
     re_path(r"^events/(?P<gid>\d+)/$", views.event_listing, name="swingtime-events"),
     re_path(r"^events/(?P<gid>\d+)/add/$", views.add_event, name="swingtime-add-event"),

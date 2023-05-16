@@ -8,7 +8,7 @@
 
         <div class="nav p-2">
             <a class="swing-button"
-               href="{% url 'swingtime-daily-view' group.id prev_day.year prev_day.month prev_day.day %}">
+               href="{% url 'swingtime-day' group.id prev_day.year prev_day.month prev_day.day %}">
                 &larr; {{ prev_day|date:"d.m.Y" }}
             </a>
             <div class="border inline-block rounded px-2">
@@ -20,7 +20,7 @@
 
             </div>
             <a class="swing-button"
-               href="{% url 'swingtime-daily-view' group.id next_day.year next_day.month next_day.day %}">
+               href="{% url 'swingtime-day' group.id next_day.year next_day.month next_day.day %}">
                 {{ next_day|date:"d.m.Y" }} &rarr;
             </a>
         </div>
