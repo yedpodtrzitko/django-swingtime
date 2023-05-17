@@ -7,6 +7,7 @@ from typing import List, Tuple
 
 from dateutil import parser
 from django import http
+from django.apps import apps
 from django.db import models
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -16,7 +17,7 @@ from django.utils.translation import gettext_lazy as _
 from . import forms, utils
 from .conf import jivetime_settings
 from .forms import WEEKDAY_SHORT
-from .models import Event, EventGroup, Occurrence
+from .models import Event, Occurrence
 
 if jivetime_settings.CALENDAR_FIRST_WEEKDAY is not None:
     calendar.setfirstweekday(jivetime_settings.CALENDAR_FIRST_WEEKDAY)
@@ -191,7 +192,7 @@ def add_event(
         a form object for adding occurrences
 
     """
-    group = get_object_or_404(EventGroup, pk=int(gid))
+    group = get_event_group(gid)
     event_form = EventFormClass(initial=dict(group=group.id))
     dtstart = datetime.now(tz=group.timezone)
 
@@ -226,7 +227,7 @@ def add_event(
     )
 
 
-def _datetime_view(request, template: str, group: EventGroup, dt: datetime, **params):
+def _datetime_view(request, template: str, group, dt: datetime, **params):
     """
     Build a time slot grid representation for the given datetime ``dt``. See
     utils.create_timeslot_table documentation for items and params.
@@ -274,7 +275,7 @@ def day_view(
     See documentation for function``_datetime_view``.
 
     """
-    group = get_object_or_404(EventGroup, pk=int(gid))
+    group = get_event_group(gid)
     if request.method == "POST" and "_goto" in request.POST:
         dt = datetime.strptime(request.POST.get("date"), "%Y-%m-%d")
         return redirect(
@@ -290,7 +291,7 @@ def today_view(request, gid: int, template="jivetime/daily_view.html", **params)
     See documentation for function``_datetime_view``.
 
     """
-    group = EventGroup.objects.get(pk=gid)
+    group = get_event_group(gid)
     dt = datetime.now(tz=group.timezone)
     return _datetime_view(request, template, group, dt, **params)
 
@@ -316,7 +317,7 @@ def year_view(request, gid: int, year: int, template="jivetime/yearly_view.html"
         which have at least 1 occurrence is represented in the list
 
     """
-    group = get_object_or_404(EventGroup, pk=int(gid))
+    group = get_event_group(gid)
     if request.method == "POST" and request.POST.get("date"):
         sent = parser.parse(request.POST["date"])
         year = sent.year
@@ -386,6 +387,13 @@ def month_current(request, gid: int):
     )
 
 
+def get_event_group(group_id):
+    model_path = jivetime_settings.EVENT_GROUP_MODEL
+    print("model path", model_path, model_path.split("."))
+    ModelClass = apps.get_model(*model_path.split("."))
+    return get_object_or_404(ModelClass, pk=group_id)
+
+
 def month_view(
     request,
     gid: int,
@@ -417,7 +425,8 @@ def month_view(
         this_month - 1 month
 
     """
-    group = get_object_or_404(EventGroup, pk=int(gid))
+
+    group = get_event_group(gid)
     year, month = int(year), int(month)
     cal_data = calendar.monthcalendar(year, month)
     dtstart = datetime(year, month, 1)
