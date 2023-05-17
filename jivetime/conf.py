@@ -30,10 +30,10 @@ DEFAULT_SETTINGS = {
     # If not None, passed to the calendar module's setfirstweekday function.
     "CALENDAR_FIRST_WEEKDAY": 6,
     # event group model has foreign key to a specific model
-    "GROUP_OWNER_MODEL": settings.AUTH_USER_MODEL,
-    "FORM_EVENT": "swingtime.forms.EventForm",
-    "FORM_RECURRENCE": "swingtime.forms.MultipleOccurrenceForm",
+    "EVENT_GROUP_MODEL": "jivetime.EventGroup",
+    "FORM_EVENT": "jivetime.forms.EventForm",
+    "FORM_RECURRENCE": "jivetime.forms.MultipleOccurrenceForm",
 }
 
-_user_settings = getattr(settings, "SWINGTIME", {})
-swingtime_settings = SimpleNamespace(**dict(DEFAULT_SETTINGS, **_user_settings))
+_user_settings = getattr(settings, "JIVETIME", {})
+jivetime_settings = SimpleNamespace(**dict(DEFAULT_SETTINGS, **_user_settings))

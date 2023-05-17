@@ -16,7 +16,6 @@ from django.core.management.base import BaseCommand, CommandError
 from django.core.management.color import color_style
 from django.db.models import signals
 from django.utils.termcolors import make_style
-
 from swingtime import models as swingtime
 
 

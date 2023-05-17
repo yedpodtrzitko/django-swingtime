@@ -2,7 +2,6 @@ from datetime import datetime
 
 import pytest
 from django.contrib.auth.models import User
-
 from swingtime.models import Event, EventGroup, EventType, Occurrence
 
 GROUP_DEFAULT_ID = 1

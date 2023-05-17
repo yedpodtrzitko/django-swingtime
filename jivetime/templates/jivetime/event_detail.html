@@ -3,7 +3,7 @@
 {% block content %}
 
     <div class="text-center">
-        {% include "swingtime/include/menu_scope.html" %}
+        {% include "jivetime/include/menu_scope.html" %}
     </div>
 
     <h3 class="swing-title">Event Details</h3>
@@ -45,7 +45,7 @@
                 {% for o in occurrences %}
                     <tr class="even:bg-gray-100">
                         <td class="font-bold">
-                            <a href="{% url 'swingtime-occurrence' group.id event.id o.id %}">
+                            <a href="{% url 'jivetime-occurrence' group.id event.id o.id %}">
                                 See Detail
                             </a>
                         </td>
@@ -82,7 +82,7 @@
                 </tr>
                 </tfoot>
                 <tbody>
-                {% include "swingtime/recurring_form_part.html" %}
+                {% include "jivetime/recurring_form_part.html" %}
                 </tbody>
             </table>
         </form>

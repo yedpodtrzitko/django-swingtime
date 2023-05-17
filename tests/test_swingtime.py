@@ -1,9 +1,8 @@
 from datetime import date, time, timezone
 
 import pytest
-from django.forms.models import model_to_dict
-
 import swingtime
+from django.forms.models import model_to_dict
 from swingtime import utils
 from swingtime.forms import EventForm, MultipleOccurrenceForm
 from swingtime.models import *

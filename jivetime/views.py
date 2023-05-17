@@ -14,12 +14,12 @@ from django.utils.module_loading import import_string
 from django.utils.translation import gettext_lazy as _
 
 from . import forms, utils
-from .conf import swingtime_settings
+from .conf import jivetime_settings
 from .forms import WEEKDAY_SHORT
 from .models import Event, EventGroup, Occurrence
 
-if swingtime_settings.CALENDAR_FIRST_WEEKDAY is not None:
-    calendar.setfirstweekday(swingtime_settings.CALENDAR_FIRST_WEEKDAY)
+if jivetime_settings.CALENDAR_FIRST_WEEKDAY is not None:
+    calendar.setfirstweekday(jivetime_settings.CALENDAR_FIRST_WEEKDAY)
 
 
 def load_config_form(form_class):
@@ -30,12 +30,12 @@ def load_config_form(form_class):
     return form_class
 
 
-EventForm = load_config_form(swingtime_settings.FORM_EVENT)
-ReccuranceForm = load_config_form(swingtime_settings.FORM_RECURRENCE)
+EventFormClass = load_config_form(jivetime_settings.FORM_EVENT)
+ReccurrenceFormClass = load_config_form(jivetime_settings.FORM_RECURRENCE)
 
 
 def event_listing(
-    request, template="swingtime/event_list.html", events=None, **extra_context
+    request, template="jivetime/event_list.html", events=None, **extra_context
 ):
     """
     View all ``events``.
@@ -58,7 +58,7 @@ def event_view(
     request,
     gid: int,
     pk: int,
-    template="swingtime/event_detail.html",
+    template="jivetime/event_detail.html",
 ):
     """
     View an ``Event`` instance and optionally update either the event or its
@@ -73,18 +73,18 @@ def event_view(
 
     event = get_object_or_404(Event, pk=int(pk), group_id=int(gid))
     group = event.group
-    recurrence_form = ReccuranceForm(
+    recurrence_form = ReccurrenceFormClass(
         initial={"dtstart": datetime.now(tz=group.timezone)}
     )
-    event_form = EventForm(instance=event)
+    event_form = EventFormClass(instance=event)
     if request.method == "POST":
         if "_update" in request.POST:
-            event_form = EventForm(request.POST, instance=event)
+            event_form = EventFormClass(request.POST, instance=event)
             if event_form.is_valid():
                 event_form.save(event)
                 return http.HttpResponseRedirect(request.path)
         elif "_add" in request.POST:
-            recurrence_form = ReccuranceForm(request.POST)
+            recurrence_form = ReccurrenceFormClass(request.POST)
             if recurrence_form.is_valid():
                 recurrence_form.save(event)
                 return http.HttpResponseRedirect(request.path)
@@ -118,7 +118,7 @@ def occurrence_view(
     gid: int,
     event_pk: int,
     pk: int,
-    template="swingtime/occurrence_detail.html",
+    template="jivetime/occurrence_detail.html",
     form_class=forms.SingleOccurrenceForm,
 ):
     """
@@ -173,7 +173,7 @@ def occurrence_view(
 def add_event(
     request,
     gid: int,
-    template="swingtime/add_event.html",
+    template="jivetime/add_event.html",
 ):
     """
     Add a new ``Event`` instance and 1 or more associated ``Occurrence``s.
@@ -192,12 +192,12 @@ def add_event(
 
     """
     group = get_object_or_404(EventGroup, pk=int(gid))
-    event_form = EventForm(initial=dict(group=group.id))
+    event_form = EventFormClass(initial=dict(group=group.id))
     dtstart = datetime.now(tz=group.timezone)
 
     if request.method == "POST":
-        event_form = EventForm(request.POST)
-        recurrence_form = ReccuranceForm(request.POST)
+        event_form = EventFormClass(request.POST)
+        recurrence_form = ReccurrenceFormClass(request.POST)
         if event_form.is_valid() and recurrence_form.is_valid():
             event = event_form.save(commit=False)
             event.group = group
@@ -212,7 +212,7 @@ def add_event(
             except (TypeError, ValueError) as e:
                 # TODO: A badly formatted date is passed to add_event
                 logging.warning(e)
-        recurrence_form = ReccuranceForm(initial={"dtstart": dtstart})
+        recurrence_form = ReccurrenceFormClass(initial={"dtstart": dtstart})
 
     return render(
         request,
@@ -267,7 +267,7 @@ def day_view(
     year: int,
     month: int,
     day: int,
-    template="swingtime/daily_view.html",
+    template="jivetime/daily_view.html",
     **params
 ):
     """
@@ -285,7 +285,7 @@ def day_view(
     return _datetime_view(request, template, group, dt, **params)
 
 
-def today_view(request, gid: int, template="swingtime/daily_view.html", **params):
+def today_view(request, gid: int, template="jivetime/daily_view.html", **params):
     """
     See documentation for function``_datetime_view``.
 
@@ -295,7 +295,7 @@ def today_view(request, gid: int, template="swingtime/daily_view.html", **params
     return _datetime_view(request, template, group, dt, **params)
 
 
-def year_view(request, gid: int, year: int, template="swingtime/yearly_view.html"):
+def year_view(request, gid: int, year: int, template="jivetime/yearly_view.html"):
     """
 
     Context parameters:
@@ -362,20 +362,28 @@ def get_scope_menu(gid: int, dt: datetime) -> List[Tuple[str, str, str]]:
     return [
         (
             ScopeEnum.YEAR,
-            reverse("swingtime-yearly-view", args=[gid, dt.year]),
+            reverse("jivetime:calendar-year", args=[gid, dt.year]),
             _("Yearly View"),
         ),
         (
             ScopeEnum.MONTH,
-            reverse("swingtime-monthly-view", args=[gid, dt.year, dt.month]),
+            reverse("jivetime:calendar-month", args=[gid, dt.year, dt.month]),
             _("Montly View"),
         ),
         (
             ScopeEnum.DAY,
-            reverse("swingtime-daily-view", args=[gid, dt.year, dt.month, dt.day]),
+            reverse("jivetime:calendar-day", args=[gid, dt.year, dt.month, dt.day]),
             _("Daily View"),
         ),
     ]
+
+
+def month_current(request, gid: int):
+    # TODO - timezone
+    today = datetime.today()
+    return redirect(
+        reverse("jivetime:calendar-month", args=[gid, today.year, today.month])
+    )
 
 
 def month_view(
@@ -383,7 +391,7 @@ def month_view(
     gid: int,
     year: int,
     month: int,
-    template="swingtime/monthly_view.html",
+    template="jivetime/monthly_view.html",
     queryset=None,
 ):
     """

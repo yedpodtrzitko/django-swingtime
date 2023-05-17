@@ -4,10 +4,10 @@
 
     <div class="text-center">
 
-        {% include "swingtime/include/menu_scope.html" %}
+        {% include "jivetime/include/menu_scope.html" %}
 
         <a class="swing-button"
-           href="{% url 'swingtime-year' group.id last_year %}"
+           href="{% url 'jivetime-year' group.id last_year %}"
            title="Previous Year">&larr;
         </a>
 
@@ -20,7 +20,7 @@
         </div>
 
         <a class="swing-button"
-           href="{% url 'swingtime-year' group.id next_year %}"
+           href="{% url 'jivetime-year' group.id next_year %}"
            title="Next Year">&rarr;
         </a>
     </div>
@@ -40,7 +40,7 @@
             {% for dt,occurrences in by_month %}
                 <tr class="hover:bg-gray-200 border-t-2">
                     <th rowspan="{{ occurrences|length }}" class="bg-white hover:bg-gray-200">
-                        <a class="h-full block" href="{% url 'swingtime-month' group.id dt.year dt.month %}">
+                        <a class="h-full block" href="{% url 'jivetime-month' group.id dt.year dt.month %}">
                             {{ dt|date:"F" }}
                         </a>
                     </th>
@@ -50,7 +50,7 @@
                                href="{{ o.get_absolute_url }}">{{ o.title }}</a>
                         </td>
                         <td>
-                            <a href="{% url 'swingtime-day' group.id o.start_time.year o.start_time.month o.start_time.day %}">
+                            <a href="{% url 'jivetime-day' group.id o.start_time.year o.start_time.month o.start_time.day %}">
                                 {{ o.start_time|date:"l, M jS" }}
                             </a>
                         </td>

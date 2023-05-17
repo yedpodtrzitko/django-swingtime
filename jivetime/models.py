@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from dateutil import rrule
+from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -8,7 +9,7 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from timezone_field import TimeZoneField
 
-from .conf import swingtime_settings
+from .conf import jivetime_settings
 
 
 class Note(models.Model):
@@ -35,15 +36,15 @@ class Note(models.Model):
 
 class EventType(models.Model):
     """
-    Simple ``Event`` classifcation.
+    Simple ``Event`` classification.
     """
 
-    abbr = models.CharField(_("abbreviation"), max_length=4, unique=True)
-    label = models.CharField(_("label"), max_length=50)
+    abbr = models.CharField(_("Abbreviation"), max_length=4, unique=True)
+    label = models.CharField(_("Lbel"), max_length=50)
 
     class Meta:
-        verbose_name = _("event type")
-        verbose_name_plural = _("event types")
+        verbose_name = _("Event type")
+        verbose_name_plural = _("Event types")
 
     def __str__(self):
         return self.label
@@ -54,7 +55,9 @@ class Event(models.Model):
     Container model for general metadata and associated ``Occurrence`` entries.
     """
 
-    group = models.ForeignKey("EventGroup", on_delete=models.CASCADE)
+    group = models.ForeignKey(
+        jivetime_settings.EVENT_GROUP_MODEL, on_delete=models.CASCADE
+    )
     title = models.CharField(_("Title"), max_length=32)
     description = models.CharField(_("Description"), max_length=100, blank=True)
     url = models.URLField(_("Event URL"), max_length=256, null=True)
@@ -232,7 +235,7 @@ def create_event(
         will default to the current hour if ``None``
 
     ``end_time``
-        will default to ``start_time`` plus swingtime_settings.DEFAULT_OCCURRENCE_DURATION
+        will default to ``start_time`` plus jivetime_settings.DEFAULT_OCCURRENCE_DURATION
         hour if ``None``
 
     ``freq``, ``count``, ``rrule_params``
@@ -257,14 +260,12 @@ def create_event(
 
     start_time = start_time or datetime.now().replace(minute=0, second=0, microsecond=0)
 
-    end_time = end_time or (start_time + swingtime_settings.DEFAULT_OCCURRENCE_DURATION)
+    end_time = end_time or (start_time + jivetime_settings.DEFAULT_OCCURRENCE_DURATION)
     event.add_occurrences(start_time, end_time, **rrule_params)
     return event
 
 
 class EventGroup(models.Model):
     name = models.CharField(max_length=128)
-    owner = models.ForeignKey(
-        swingtime_settings.GROUP_OWNER_MODEL, on_delete=models.CASCADE, null=True
-    )
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     timezone = TimeZoneField()

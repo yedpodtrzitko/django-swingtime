@@ -13,7 +13,7 @@
                 <td class="border {% if day == today.day %}today{% endif %}">
                     {% if day %}
                         <div class="day-ordinal">
-                            <a href="{% url 'swingtime-day' group.id this_month.year this_month.month day %}">{{ day }}</a>
+                            <a href="{% url 'jivetime-day' group.id this_month.year this_month.month day %}">{{ day }}</a>
                         </div>
                         {% if items %}
                             <ul>{% for item in items %}

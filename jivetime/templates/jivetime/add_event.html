@@ -14,7 +14,7 @@
         {% csrf_token %}
         <table>
             {{ event_form.as_table }}
-            {% include "swingtime/recurring_form_part.html" %}
+            {% include "jivetime/recurring_form_part.html" %}
         </table>
 
         <input class="swing-button swing-button-primary" type="submit" value="Add Event"/>

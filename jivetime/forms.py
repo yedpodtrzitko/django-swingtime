@@ -5,12 +5,13 @@ from datetime import date, datetime, time, timedelta
 
 from dateutil import rrule
 from django import forms
+from django.apps import apps
 from django.forms.utils import to_current_timezone
 from django.forms.widgets import SelectDateWidget
 from django.utils.translation import gettext_lazy as _
 
 from . import utils
-from .conf import swingtime_settings
+from .conf import jivetime_settings
 from .models import Event, Occurrence
 
 
@@ -19,7 +20,7 @@ def get_days_order(first_days: int, days):
 
 
 WEEKDAY_SHORT = get_days_order(
-    swingtime_settings.CALENDAR_FIRST_WEEKDAY,
+    jivetime_settings.CALENDAR_FIRST_WEEKDAY,
     [
         (1, _("Mon")),
         (2, _("Tue")),
@@ -32,7 +33,7 @@ WEEKDAY_SHORT = get_days_order(
 )
 
 WEEKDAY_LONG = get_days_order(
-    swingtime_settings.CALENDAR_FIRST_WEEKDAY,
+    jivetime_settings.CALENDAR_FIRST_WEEKDAY,
     [
         (1, _("Monday")),
         (2, _("Tuesday")),
@@ -105,17 +106,15 @@ ISO_WEEKDAYS_MAP = (
     rrule.SU,
 )
 
-MINUTES_INTERVAL = swingtime_settings.TIMESLOT_INTERVAL.seconds // 60
-SECONDS_INTERVAL = utils.time_delta_total_seconds(
-    swingtime_settings.DEFAULT_OCCURRENCE_DURATION
-)
+MINUTES_INTERVAL = jivetime_settings.TIMESLOT_INTERVAL.seconds // 60
+SECONDS_INTERVAL = jivetime_settings.DEFAULT_OCCURRENCE_DURATION.total_seconds()
 
 
 def timeslot_options(
-    interval=swingtime_settings.TIMESLOT_INTERVAL,
-    start_time: time = swingtime_settings.TIMESLOT_START_TIME,
-    end_delta: timedelta = swingtime_settings.TIMESLOT_END_TIME_DURATION,
-    fmt: str = swingtime_settings.TIMESLOT_TIME_FORMAT,
+    interval=jivetime_settings.TIMESLOT_INTERVAL,
+    start_time: time = jivetime_settings.TIMESLOT_START_TIME,
+    end_delta: timedelta = jivetime_settings.TIMESLOT_END_TIME_DURATION,
+    fmt: str = jivetime_settings.TIMESLOT_TIME_FORMAT,
 ):
     """
     Create a list of time slot options for use in swingtime forms.
@@ -137,10 +136,10 @@ def timeslot_options(
 
 
 def timeslot_offset_options(
-    interval=swingtime_settings.TIMESLOT_INTERVAL,
-    start_time: time = swingtime_settings.TIMESLOT_START_TIME,
-    end_delta: timedelta = swingtime_settings.TIMESLOT_END_TIME_DURATION,
-    fmt: str = swingtime_settings.TIMESLOT_TIME_FORMAT,
+    interval=jivetime_settings.TIMESLOT_INTERVAL,
+    start_time: time = jivetime_settings.TIMESLOT_START_TIME,
+    end_delta: timedelta = jivetime_settings.TIMESLOT_END_TIME_DURATION,
+    fmt: str = jivetime_settings.TIMESLOT_TIME_FORMAT,
 ):
     """
     Create a list of time slot options for use in swingtime forms.
@@ -154,8 +153,8 @@ def timeslot_offset_options(
     dtend = dtstart + end_delta
     options = []
 
-    delta = utils.time_delta_total_seconds(dtstart - dt)
-    seconds = utils.time_delta_total_seconds(interval)
+    delta = (dtstart - dt).total_seconds()
+    seconds = interval.total_seconds()
     while dtstart <= dtend:
         options.append((delta, dtstart.strftime(fmt)))
         dtstart += interval

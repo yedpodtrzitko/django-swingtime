@@ -1,24 +1,11 @@
 """
-Common features and functions for swingtime
+Common features and functions for jivetime
 """
 import calendar
-import itertools
-from collections import defaultdict
 from datetime import date, datetime, time, timedelta, tzinfo
 
-from django.utils.safestring import mark_safe
-
-from .conf import swingtime_settings
-from .models import EventType, Occurrence
-
-
-def time_delta_total_seconds(time_delta) -> int:
-    """
-    Calculate the total number of seconds represented by a
-    ``datetime.timedelta`` object
-
-    """
-    return time_delta.days * 3600 + time_delta.seconds
+from .conf import jivetime_settings
+from .models import Occurrence
 
 
 def month_boundaries(dt=None):
@@ -33,33 +20,13 @@ def month_boundaries(dt=None):
     return (start, start + timedelta(ndays - 1))
 
 
-def default_css_class_cycler():
-    return itertools.cycle(("evt-even", "evt-odd"))
-
-
-def css_class_cycler():
-    """
-    Return a dictionary keyed by ``EventType`` abbreviations, whose values are an
-    iterable or cycle of CSS class names.
-
-    """
-    FMT = "evt-{0}-{1}".format
-    return defaultdict(
-        default_css_class_cycler,
-        (
-            (e.abbr, itertools.cycle((FMT(e.abbr, "even"), FMT(e.abbr, "odd"))))
-            for e in EventType.objects.all()
-        ),
-    )
-
-
 def create_timeslot_table(
     timezone: tzinfo,
     dt: datetime,
-    start_time: time = swingtime_settings.TIMESLOT_START_TIME,
-    end_time_delta: timedelta = swingtime_settings.TIMESLOT_END_TIME_DURATION,
-    time_delta: timedelta = swingtime_settings.TIMESLOT_INTERVAL,
-    min_columns=swingtime_settings.TIMESLOT_MIN_COLUMNS,
+    start_time: time = jivetime_settings.TIMESLOT_START_TIME,
+    end_time_delta: timedelta = jivetime_settings.TIMESLOT_END_TIME_DURATION,
+    time_delta: timedelta = jivetime_settings.TIMESLOT_INTERVAL,
+    min_columns=jivetime_settings.TIMESLOT_MIN_COLUMNS,
 ) -> list:
     """
     Create a grid-like object representing a sequence of times (rows) and
