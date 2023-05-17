@@ -7,13 +7,11 @@
         {% for day,items in row %}
             <div class="border{% if day == today.day %} today{% endif %}">
                 {% if day %}
-                    <div class="text-center font-bold m-1">
-                        <a title="see day detail"
-                           class="inline-block border w-full bg-gray-300 hover:bg-gray-400"
-                           href="{% url 'jivetime:calendar-day' group.id this_month.year this_month.month day %}">
-                            {{ day }}
-                        </a>
-                    </div>
+                    <a title="see day detail"
+                       class="block border bg-gray-300 hover:bg-gray-400 p-2 text-center font-bold"
+                       href="{% url 'jivetime:calendar-day' group.id this_month.year this_month.month day %}">
+                        {{ day }}
+                    </a>
                     {% for item in items %}
                         <a href="{{ item.get_absolute_url }}"
                            class="block border p-1 m-1 bg-gray-100 rounded hover:bg-gray-200">

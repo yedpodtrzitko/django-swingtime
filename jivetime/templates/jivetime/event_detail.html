@@ -45,7 +45,7 @@
                 {% for o in occurrences %}
                     <tr class="even:bg-gray-100">
                         <td class="font-bold">
-                            <a href="{% url 'jivetime-occurrence' group.id event.id o.id %}">
+                            <a href="{% url 'jivetime:event-occurrence' group.id event.id o.id %}">
                                 See Detail
                             </a>
                         </td>

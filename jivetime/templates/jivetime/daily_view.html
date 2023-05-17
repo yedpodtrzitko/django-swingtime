@@ -8,7 +8,7 @@
 
         <div class="nav p-2">
             <a class="swing-button"
-               href="{% url 'jivetime-day' group.id prev_day.year prev_day.month prev_day.day %}">
+               href="{% url 'jivetime:calendar-day' group.id prev_day.year prev_day.month prev_day.day %}">
                 &larr; {{ prev_day|date:"d.m.Y" }}
             </a>
             <div class="border inline-block rounded px-2">
@@ -20,7 +20,7 @@
 
             </div>
             <a class="swing-button"
-               href="{% url 'jivetime-day' group.id next_day.year next_day.month next_day.day %}">
+               href="{% url 'jivetime:calendar-day' group.id next_day.year next_day.month next_day.day %}">
                 {{ next_day|date:"d.m.Y" }} &rarr;
             </a>
         </div>
@@ -39,7 +39,7 @@
             <tr class="even:bg-gray-100">
                 <th class="center">
                     <a class="swing-button-style p-1 my-1 font-mono inline-block"
-                       href="{% url 'jivetime-add-event' group.id %}?dtstart={{ tm|date:"Y-m-d\TH:i" }}">
+                       href="{% url 'jivetime:event-add' group.id %}?dtstart={{ tm|date:"Y-m-d\TH:i" }}">
                         {{ tm|date:"h:i a" }}
                     </a>
                 </th>
