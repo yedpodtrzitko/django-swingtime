@@ -11,8 +11,8 @@ if sys.argv[-1] == "publish":
 with open("README.rst", "r") as f:
     long_description = f.read()
 
-# Dynamically calculate the version based on swingtime.VERSION.
-version = __import__("swingtime").get_version()
+# Dynamically calculate the version based on jivetime.VERSION.
+version = __import__("jivetime").get_version()
 
 setup(
     name="django-swingtime",

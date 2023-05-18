@@ -1,22 +1,20 @@
 """
 #---------------------------------------------------------------------------------+
-| Welcome to the swingtime demo project. This project's theme is a Karate dojo    |
+| Welcome to the jivetime demo project. This project's theme is a Karate dojo    |
 | and the database will be pre-populated with some data relative to today's date. |
 #---------------------------------------------------------------------------------+
 """
 import os
-from datetime import date, datetime, time, timedelta
+from datetime import datetime, time, timedelta
 
-import django
 from dateutil import rrule
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management import call_command
-from django.core.management.base import BaseCommand, CommandError
-from django.core.management.color import color_style
-from django.db.models import signals
+from django.core.management.base import BaseCommand
 from django.utils.termcolors import make_style
-from swingtime import models as swingtime
+
+from jivetime.models import EventType, create_event
 
 
 class Term:
@@ -29,7 +27,7 @@ def create_sample_data():
     # Create the studio's event types
     ets = dict(
         (
-            (abbr, swingtime.EventType.objects.create(abbr=abbr, label=label))
+            (abbr, EventType.objects.create(abbr=abbr, label=label))
             for abbr, label in (
                 ("prv", "Private Lesson"),
                 ("bgn", "Beginner Class"),
@@ -44,13 +42,13 @@ def create_sample_data():
     print(__doc__)
     print(
         "Created event types: %s"
-        % (", ".join(["%s" % et for et in swingtime.EventType.objects.all()]),)
+        % (", ".join(["%s" % et for et in EventType.objects.all()]),)
     )
 
     now = datetime.now()
 
     # create a single occurrence event
-    evt = swingtime.create_event(
+    evt = create_event(
         "Grand Opening",
         ets["spc"],
         description="Open house",
@@ -61,7 +59,7 @@ def create_sample_data():
     print('Created event "%s" with %d occurrences' % (evt, evt.occurrence_set.count()))
 
     # create an event with multiple occurrences by fixed count
-    evt = swingtime.create_event(
+    evt = create_event(
         "Beginner Class",
         ets["bgn"],
         description="Open to all white and yellow belts",
@@ -72,7 +70,7 @@ def create_sample_data():
     print('Created event "%s" with %d occurrences' % (evt, evt.occurrence_set.count()))
 
     # create an event with multiple occurrences by ending date (until)
-    evt = swingtime.create_event(
+    evt = create_event(
         "Advance Class",
         ets["adv"],
         description="Open to all green and brown belts",
@@ -83,7 +81,7 @@ def create_sample_data():
     print('Created event "%s" with %d occurrences' % (evt, evt.occurrence_set.count()))
 
     # create an event with multiple occurrences by fixed count on monthly basis
-    evt = swingtime.create_event(
+    evt = create_event(
         "Black Belt Class",
         ets["bbc"],
         description="Open to all black belts",
@@ -96,7 +94,7 @@ def create_sample_data():
     print('Created event "%s" with %d occurrences' % (evt, evt.occurrence_set.count()))
 
     # create an event with multiple occurrences and alternate intervale
-    evt = swingtime.create_event(
+    evt = create_event(
         "Open Dojo",
         ets["open"],
         description="Open to all students",

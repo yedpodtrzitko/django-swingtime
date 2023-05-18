@@ -21,9 +21,9 @@ import sys
 
 sys.path.append(os.path.abspath(".."))
 
-import swingtime
+import jivetime
 
-VERSION = swingtime.VERSION
+VERSION = jivetime.VERSION
 
 # General configuration
 # ---------------------

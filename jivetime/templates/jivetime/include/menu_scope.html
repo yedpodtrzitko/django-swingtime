@@ -1,10 +1,8 @@
-<div>
+<div class="jive-btn-group w-1/2">
     {% for link_scope, url, label in scope_menu %}
-        <div class="inline-block">
-            <a class="swing-button {% if scope_id == link_scope %} swing-active{% endif %}"
-               href="{{ url }}">
-                {{ label }}
-            </a>
-        </div>
+        <a class="jive-btn jive-btn-primary {% if scope_id == link_scope %} jive-btn-accent{% endif %}"
+           href="{{ url }}">
+            {{ label }}
+        </a>
     {% endfor %}
 </div>

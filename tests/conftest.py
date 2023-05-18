@@ -1,8 +1,11 @@
 from datetime import datetime
 
 import pytest
+from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
-from swingtime.models import Event, EventGroup, EventType, Occurrence
+
+from jivetime.models import Event, EventGroup, EventType, Occurrence
 
 GROUP_DEFAULT_ID = 1
 
@@ -10,7 +13,14 @@ GROUP_DEFAULT_ID = 1
 @pytest.fixture
 def group_default():
     def create_group(**kwargs):
-        defaults = {"name": "testing group", **kwargs}
+        # OwnerClass = settings.AUTH_USER_MODEL
+        OwnerClass = get_user_model()
+        owner, _ = OwnerClass.objects.get_or_create(username="test")
+        defaults = {
+            "owner": owner,
+            "name": "testing group",
+        }
+        defaults.update(kwargs)
         g, _ = EventGroup.objects.get_or_create(
             id=GROUP_DEFAULT_ID,
             defaults=defaults,

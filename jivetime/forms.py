@@ -117,7 +117,7 @@ def timeslot_options(
     fmt: str = jivetime_settings.TIMESLOT_TIME_FORMAT,
 ):
     """
-    Create a list of time slot options for use in swingtime forms.
+    Create a list of time slot options for use in jivetime forms.
 
     The list is compromised of 2-tuples containing a 24-hour time value and a
     12-hour temporal representation of that offset.
@@ -142,7 +142,7 @@ def timeslot_offset_options(
     fmt: str = jivetime_settings.TIMESLOT_TIME_FORMAT,
 ):
     """
-    Create a list of time slot options for use in swingtime forms.
+    Create a list of time slot options for use in jivetime forms.
 
     The list is compromised of 2-tuples containing the number of seconds since the
     start of the day and a 12-hour temporal representation of that offset.

@@ -379,14 +379,14 @@
             <nav>
                 <a href="{% url 'karate-home' %}">Home</a> &middot;
                 {% if group %}
-                    <a href="{% url 'swingtime-today' group.id %}">Daily View</a> &middot;
+                    <a href="{% url 'jivetime:calendar-today' group.id %}">Daily View</a> &middot;
                     {% if current_datetime %}
-                        <a href="{% url 'swingtime-monthly-view' group.id current_datetime.year current_datetime.month %}">
+                        <a href="{% url 'jivetime:calendar-month' group.id current_datetime.year current_datetime.month %}">
                             Monthly View</a> &middot;
-                        <a href="{% url 'swingtime-yearly-view' group.id current_datetime.year %}">Yearly View</a>
+                        <a href="{% url 'jivetime:calendar-year' group.id current_datetime.year %}">Yearly View</a>
                         &middot;
                     {% endif %}
-                    <a href="{% url 'swingtime-events' group.id %}">Event Listing</a>
+                    <a href="{% url 'jivetime:event-list' group.id %}">Event Listing</a>
                 {% endif %}
             </nav>
         {% endblock navigation %}

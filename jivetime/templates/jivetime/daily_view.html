@@ -1,25 +1,25 @@
 {% extends "base.html" %}
 {% block title %}Daily View{% endblock %}
+
 {% block content %}
 
     <div class="text-center">
 
         {% include "jivetime/include/menu_scope.html" %}
 
-        <div class="nav p-2">
-            <a class="swing-button"
+        <div class="jive-btn-group pl-10">
+            <a class="jive-btn"
                href="{% url 'jivetime:calendar-day' group.id prev_day.year prev_day.month prev_day.day %}">
                 &larr; {{ prev_day|date:"d.m.Y" }}
             </a>
-            <div class="border inline-block rounded px-2">
-                <form action="." method="post">
-                    {% csrf_token %}
-                    <input type="date" name="date" value="{{ day|date:"Y-m-d" }}"/>
-                    <input type="submit" name="_goto" value="Go to" class="swing-button"/>
-                </form>
 
-            </div>
-            <a class="swing-button"
+            <form action="." method="post" class="jive-btn-group px-2">
+                {% csrf_token %}
+                <input type="date" name="date" value="{{ day|date:"Y-m-d" }}"/>
+                <input type="submit" name="_goto" value="Go to selected" class="jive-btn"/>
+            </form>
+
+            <a class="jive-btn"
                href="{% url 'jivetime:calendar-day' group.id next_day.year next_day.month next_day.day %}">
                 {{ next_day|date:"d.m.Y" }} &rarr;
             </a>
@@ -38,7 +38,7 @@
         {% for tm,cells in timeslots %}
             <tr class="even:bg-gray-100">
                 <th class="center">
-                    <a class="swing-button-style p-1 my-1 font-mono inline-block"
+                    <a class="jive-btn font-mono"
                        href="{% url 'jivetime:event-add' group.id %}?dtstart={{ tm|date:"Y-m-d\TH:i" }}">
                         {{ tm|date:"h:i a" }}
                     </a>
@@ -46,7 +46,7 @@
                 {% for occ in cells %}
                     <td>
                         {% if occ %}
-                            <a class="swing-button block"
+                            <a class="jive-btn block"
                                href="{{ occ.get_absolute_url }}">
                                 {{ occ.title }}
                             </a>

@@ -1,28 +1,30 @@
 {% extends "base.html" %}
 {% block title %}Yearly View {{ year }}{% endblock %}
+
 {% block content %}
 
     <div class="text-center">
 
         {% include "jivetime/include/menu_scope.html" %}
 
-        <a class="swing-button"
-           href="{% url 'jivetime:calendar-year' group.id last_year %}"
-           title="Previous Year">&larr;
-        </a>
+        <div class="jive-btn-group pl-10">
+            <a class="jive-btn"
+               href="{% url 'jivetime:calendar-year' group.id last_year %}"
+               title="Previous Year">&larr;
+            </a>
 
-        <div class="inline-block px-2 rounded">
-            <form action="." method="post">
-                {% csrf_token %}
-                <input type="date" name="date" value="{{ today|date:"Y-m-d" }}"/>
-                <input type="submit" name="_goto" value="Go to" class="swing-button"/>
-            </form>
+            <form action="." method="post" class="jive-btn-group px-2">
+                    {% csrf_token %}
+                    <input type="date" name="date" value="{{ today|date:"Y-m-d" }}"/>
+                    <input type="submit" name="_goto" value="Go to selected" class="jive-btn"/>
+                </form>
+
+            <a class="jive-btn"
+               href="{% url 'jivetime:calendar-year' group.id next_year %}"
+               title="Next Year">&rarr;
+            </a>
         </div>
 
-        <a class="swing-button"
-           href="{% url 'jivetime:calendar-year' group.id next_year %}"
-           title="Next Year">&rarr;
-        </a>
     </div>
 
     {% if by_month %}
@@ -40,7 +42,7 @@
             {% for dt,occurrences in by_month %}
                 <tr class="hover:bg-gray-200 border-t-2">
                     <th rowspan="{{ occurrences|length }}" class="bg-white hover:bg-gray-200">
-                        <a class="h-full block" href="{% url 'calendar-month' group.id dt.year dt.month %}">
+                        <a class="h-full block" href="{% url 'jivetime:calendar-month' group.id dt.year dt.month %}">
                             {{ dt|date:"F" }}
                         </a>
                     </th>

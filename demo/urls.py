@@ -14,7 +14,7 @@ def docs(request):
     return http.HttpResponsePermanentRedirect(os.path.join(request.path, "index.html"))
 
 
-swingtime_patterns = [
+jivetime_patterns = [
     re_path(r"^$", TemplateView.as_view(template_name="intro.html"), name="demo-home"),
     re_path(r"^karate/", include("karate.urls")),
     re_path(r"^admin/", admin.site.urls),
@@ -26,5 +26,5 @@ swingtime_patterns = [
 
 urlpatterns = [
     re_path(r"^$", RedirectView.as_view(url="/swingtime/")),
-    re_path(r"^swingtime/", include(swingtime_patterns)),
+    re_path(r"^jivetime/", include(jivetime_patterns)),
 ]

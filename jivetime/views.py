@@ -92,7 +92,7 @@ def event_view(
         elif "_delete" in request.POST:
             event.delete()
             return http.HttpResponseRedirect(
-                reverse("swingtime-today", args=[group.id])
+                reverse("jivetime:calendar-today", args=[group.id])
             )
         else:
             return http.HttpResponseBadRequest("Bad Request")
@@ -143,7 +143,7 @@ def occurrence_view(
             occurrence.delete()
             return http.HttpResponseRedirect(
                 reverse(
-                    "swingtime-daily-view", args=[group.id, st.year, st.month, st.day]
+                    "jivetime:calendar-day", args=[group.id, st.year, st.month, st.day]
                 )
             )
 
@@ -153,7 +153,7 @@ def occurrence_view(
             st = occurrence.start_time
             return http.HttpResponseRedirect(
                 reverse(
-                    "swingtime-daily-view", args=[group.id, st.year, st.month, st.day]
+                    "jivetime:calendar-day", args=[group.id, st.year, st.month, st.day]
                 )
             )
     else:
@@ -279,7 +279,7 @@ def day_view(
     if request.method == "POST" and "_goto" in request.POST:
         dt = datetime.strptime(request.POST.get("date"), "%Y-%m-%d")
         return redirect(
-            reverse("swingtime-daily-view", args=[group.id, dt.year, dt.month, dt.day])
+            reverse("jivetime:calendar-day", args=[group.id, dt.year, dt.month, dt.day])
         )
 
     dt = datetime(int(year), int(month), int(day), tzinfo=group.timezone)
@@ -321,7 +321,7 @@ def year_view(request, gid: int, year: int, template="jivetime/yearly_view.html"
     if request.method == "POST" and request.POST.get("date"):
         sent = parser.parse(request.POST["date"])
         year = sent.year
-        return redirect(reverse("swingtime-yearly-view", args=[group.id, year]))
+        return redirect(reverse("jivetime:calendar-day", args=[group.id, year]))
 
     year = int(year)
     occurrences = Occurrence.objects.filter(

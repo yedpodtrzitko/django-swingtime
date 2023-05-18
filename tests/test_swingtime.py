@@ -1,11 +1,13 @@
-from datetime import date, time, timezone
+from datetime import date, datetime, time, timezone
 
 import pytest
-import swingtime
+from dateutil import rrule
 from django.forms.models import model_to_dict
-from swingtime import utils
-from swingtime.forms import EventForm, MultipleOccurrenceForm
-from swingtime.models import *
+from django.urls import reverse
+
+from jivetime import utils
+from jivetime.forms import EventForm, MultipleOccurrenceForm
+from jivetime.models import Event, EventType, create_event
 
 expected_table_1 = """\
 | 15:00 |          |          |          |          |          |
@@ -285,10 +287,6 @@ class TestCreation:
 
 
 class TestMisc:
-    def test_version(self):
-        V = swingtime.VERSION
-        assert swingtime.get_version() == ".".join([str(i) for i in V])
-
     def test_month_boundaries(self):
         dt = datetime(2012, 2, 15)
         start, end = utils.month_boundaries(dt)
@@ -299,73 +297,81 @@ class TestMisc:
 @pytest.mark.django_db
 class TestViews:
     def test_today(self, client, group_default):
-        r = client.get(reverse("swingtime-today", args=[group_default().id]))
+        r = client.get(reverse("jivetime:calendar-today", args=[group_default().id]))
         assert r.status_code == 200
 
     def test_year(self, client, group_default, occurrence):
         # r'^calendar/(?P<year>\d{4})/$', views.year_view
         r = client.get(
-            reverse("swingtime-yearly-view", args=[group_default().id, 2018])
+            reverse("jivetime:calendar-year", args=[group_default().id, 2018])
         )
         assert r.status_code == 200
 
     def test_month(self, client, group_default, occurrence):
         # r'^calendar/(\d{4})/(0?[1-9]|1[012])/$', views.month_view
-        url = reverse("swingtime-monthly-view", args=[group_default().id, 2018, 3])
+        url = reverse("jivetime:calendar-month", args=[group_default().id, 2018, 3])
         r = client.get(url)
         assert r.status_code == 200
 
     def test_daily(self, client, group_default):
         # r'^calendar/(\d{4})/(0?[1-9]|1[012])/([0-3]?\d)/$', views.day_view
         r = client.get(
-            reverse("swingtime-daily-view", args=[group_default().id, 2018, 3, 18])
+            reverse("jivetime:calendar-day", args=[group_default().id, 2018, 3, 18])
         )
         assert r.status_code == 200
 
     def test_listing(self, client, group_default):
         # r'^events/$', views.event_listing
-        r = client.get(reverse("swingtime-events", args=[group_default().id]))
+        r = client.get(reverse("jivetime:event-list", args=[group_default().id]))
         assert r.status_code == 200
 
     def test_add_event_start_dtstart(self, client, group_default):
         # r'^events/add/$', views.add_event
         r = client.get(
-            reverse("swingtime-add-event", args=[group_default().id])
+            reverse("jivetime:event-add", args=[group_default().id])
             + "?dtstart=20180318"
         )
         assert r.status_code == 200
 
     def test_add_event_start_dtstart_bad(self, client, group_default):
         r = client.get(
-            reverse("swingtime-add-event", args=[group_default().id]) + "?dtstart=BAD"
+            reverse("jivetime:event-add", args=[group_default().id]) + "?dtstart=BAD"
         )
         assert r.status_code == 200
 
     def test_add_event_start_no_dtstart(self, client, group_default):
-        r = client.post(reverse("swingtime-add-event", args=[group_default().id]))
+        r = client.post(reverse("jivetime:event-add", args=[group_default().id]))
         assert r.status_code == 200
 
     def test_event_view(self, client, occurrence, group_default):
         # r'^events/(\d+)/$', views.event_view
         r = client.get(
-            reverse("swingtime-event", args=[group_default().id, occurrence.event.id])
+            reverse(
+                "jivetime:event-detail", args=[group_default().id, occurrence.event.id]
+            )
         )
         assert r.status_code == 200
 
         r = client.post(
-            reverse("swingtime-event", args=[group_default().id, occurrence.event.id]),
+            reverse(
+                "jivetime:event-detail", args=[group_default().id, occurrence.event.id]
+            ),
             model_to_dict(occurrence.event),
         )
         assert r.status_code == 400
 
         r = client.post(
-            reverse("swingtime-event", args=[group_default().id, occurrence.event.id]),
+            reverse(
+                "jivetime:event-detail", args=[group_default().id, occurrence.event.id]
+            ),
             dict(model_to_dict(occurrence.event), _update=""),
         )
         assert r.status_code == 302
 
         r = client.post(
-            reverse("swingtime-event", args=[group_default().id, occurrence.event.id]),
+            reverse(
+                "jivetime:event-detail", args=[group_default().id, occurrence.event.id]
+            ),
             dict(model_to_dict(occurrence.event), _add=""),
         )
         assert r.status_code == 200
@@ -373,7 +379,7 @@ class TestViews:
         # r'^events/(\d+)/(\d+)/$', views.occurrence_view
         r = client.get(
             reverse(
-                "swingtime-occurrence",
+                "jivetime:event-occurrence",
                 args=[group_default().id, occurrence.event.id, occurrence.id],
             )
         )
@@ -390,7 +396,7 @@ class TestViews:
 
         r = client.post(
             reverse(
-                "swingtime-occurrence",
+                "jivetime:event-occurrence",
                 args=[group_default().id, occurrence.event.id, occurrence.id],
             ),
             data,

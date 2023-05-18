@@ -1,7 +1,5 @@
 {% extends "base.html" %}
-{% block title %}
-    Monthly View
-{% endblock %}
+{% block title %}Monthly View{% endblock %}
 
 {% block content %}
 
@@ -9,21 +7,24 @@
 
         {% include "jivetime/include/menu_scope.html" %}
 
-        <a class="swing-button"
-           href="{% url 'jivetime:calendar-month' group.id last_month.year last_month.month %}"
-           title="Previous Month">&larr; {{ last_month|date:"m/Y" }}</a>
+        <div class="jive-btn-group pl-10">
+            <a class="jive-btn"
+               href="{% url 'jivetime:calendar-month' group.id last_month.year last_month.month %}"
+               title="Previous Month">&larr; {{ last_month|date:"m/Y" }}
+            </a>
 
-        <div class="inline-block px-2 rounded">
-            <form action="." method="post">
+            <form action="." method="post" class="jive-btn-group px-2">
                 {% csrf_token %}
                 <input type="date" name="date" value="{{ this_month|date:"Y-m-d" }}"/>
-                <input type="submit" name="_goto" value="Go to selected" class="swing-button"/>
+                <input type="submit" name="_goto" value="Go to selected" class="jive-btn"/>
             </form>
+
+            <a class="jive-btn"
+               href="{% url 'jivetime:calendar-month' group.id next_month.year next_month.month %}"
+               title="Next Month">{{ next_month|date:"m/Y" }} &rarr;
+            </a>
         </div>
 
-        <a class="swing-button"
-           href="{% url 'jivetime:calendar-month' group.id next_month.year next_month.month %}"
-           title="Next Month">{{ next_month|date:"m/Y" }} &rarr;</a>
     </div>
 
     {% include "jivetime/include/cal_grid.html" %}

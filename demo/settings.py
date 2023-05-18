@@ -6,13 +6,13 @@ try:
     # dateutil is an absolute requirement
     import dateutil
 except ImportError:
-    raise ImportError('django-swingtime requires the "python-dateutil" package')
+    raise ImportError('django-jivetime requires the "python-dateutil" package')
 
 dirname = os.path.dirname
 sys.path.extend(
     [
         os.path.dirname(__file__),
-        os.path.abspath(".."),  # relative location of swingtime app
+        os.path.abspath(".."),  # relative location of jivetime app
     ]
 )
 
@@ -29,7 +29,7 @@ STATIC_ROOT = "static"
 TIME_ZONE = "America/New_York"
 SITE_ID = 1
 USE_I18N = True
-SECRET_KEY = "swingtime-demo"
+SECRET_KEY = "jivetime-demo"
 TEST_RUNNER = "django.test.runner.DiscoverRunner"
 TEMPLATES = [
     {
@@ -45,7 +45,7 @@ TEMPLATES = [
                 "django.template.context_processors.debug",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "swingtime.context_processors.current_datetime",
+                "jivetime.context_processors.current_datetime",
             ),
         },
     }
@@ -60,7 +60,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.admin",
     "django.contrib.staticfiles",
-    "swingtime",
+    "jivetime",
     "karate",
 ]
 
@@ -74,7 +74,7 @@ MIDDLEWARE = (
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 )
 
-SWINGTIME = {
+JIVETIME = {
     "TIMESLOT_START_TIME": datetime.time(14),
     "TIMESLOT_END_TIME_DURATION": datetime.timedelta(hours=6.5),
 }

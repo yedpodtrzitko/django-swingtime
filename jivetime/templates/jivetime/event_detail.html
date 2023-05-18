@@ -6,7 +6,7 @@
         {% include "jivetime/include/menu_scope.html" %}
     </div>
 
-    <h3 class="swing-title">Event Details</h3>
+    <h3 class="jive-title">Event Details</h3>
 
     <form action="." method="post">
         {% csrf_token %}
@@ -16,18 +16,18 @@
             </table>
             <div class="h-4"></div>
             <input type="submit" name="_update" value="Update Details"
-                   class="swing-button swing-button-primary"/>
+                   class="jive-btn jive-btn-primary"/>
         </div>
         <div class="my-2 border rounded bg-gray-50 p-4">
             <div class="py-2">Remove Event and all its occurrences</div>
             <input type="submit" name="_delete" value="Delete Event"
-                   class="swing-button-danger swing-button"/>
+                   class="jive-btn-danger jive-btn"/>
         </div>
 
 
     </form>
 
-    <h3 class="swing-title">
+    <h3 class="jive-title">
         Event Occurrences
     </h3>
 
@@ -35,7 +35,7 @@
         {% if occurrences %}
             <table class="table-auto w-full">
                 <thead>
-                <tr class="font-bold swing-accent">
+                <tr class="font-bold jive-accent">
                     <td>Detail</td>
                     <td>Weekday</td>
                     <td>Date</td>
@@ -68,7 +68,7 @@
         {% endif %}
     </div>
 
-    <h4 class="swing-title pt-8">Add More Occurrences</h4>
+    <h4 class="jive-title pt-8">Add More Occurrences</h4>
     <div class="border rounded p-2 bg-gray-50">
         <form action="." method="post">
             {% csrf_token %}
@@ -77,7 +77,7 @@
                 <tr>
                     <td colspan="2">
                         <input type="submit" name="_add" value="Add Occurrences"
-                               class="swing-button swing-button-primary"/>
+                               class="jive-btn jive-btn-primary"/>
                     </td>
                 </tr>
                 </tfoot>

@@ -1,14 +1,14 @@
 from datetime import datetime, timedelta
 
 from django.shortcuts import get_object_or_404, render
-from django.template.context import RequestContext
-from swingtime import models as swingtime
+
+from jivetime.models import EventType, Occurrence
 
 
 def event_type(request, abbr):
-    event_type = get_object_or_404(swingtime.EventType, abbr=abbr)
+    event_type = get_object_or_404(EventType, abbr=abbr)
     now = datetime.now()
-    occurrences = swingtime.Occurrence.objects.filter(
+    occurrences = Occurrence.objects.filter(
         event__event_type=event_type,
         start_time__gte=now,
         start_time__lte=now + timedelta(days=+30),

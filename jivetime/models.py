@@ -79,7 +79,7 @@ class Event(models.Model):
 
     def get_absolute_url(self):
         assert self.group
-        return reverse("swingtime-event", args=[self.group_id, str(self.id)])
+        return reverse("jivetime:event-detail", args=[self.group_id, str(self.id)])
 
     def add_occurrences(self, start_time: datetime, end_time: datetime, **rrule_params):
         """
@@ -192,7 +192,7 @@ class Occurrence(models.Model):
 
     def get_absolute_url(self):
         return reverse(
-            "swingtime-occurrence",
+            "jivetime:event-occurrence",
             args=[self.event.group_id, self.event.id, self.id],
         )
 
