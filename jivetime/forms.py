@@ -289,8 +289,8 @@ class MultipleOccurrenceForm(forms.Form):
         widget=forms.Select(choices=WEEKDAY_LONG), required=False
     )
 
-    def __init__(self, *args, **kws):
-        super().__init__(*args, **kws)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         dtstart = self.initial.get("dtstart")
         if dtstart:
@@ -303,7 +303,7 @@ class MultipleOccurrenceForm(forms.Form):
             weekday = dtstart.isoweekday()
             ordinal = dtstart.day // 7
             ordinal = "%d" % (-1 if ordinal > 3 else ordinal + 1,)
-            midnight = datetime.combine(dtstart.date(), time(0, tzinfo=dtstart.tzinfo))
+            midnight = datetime.combine(dtstart.date(), time(0))
             offset = (dtstart - midnight).total_seconds()
 
             self.initial.setdefault("day", dtstart)
@@ -322,6 +322,7 @@ class MultipleOccurrenceForm(forms.Form):
     def clean(self):
         if "day" in self.cleaned_data:
             day = datetime.combine(self.cleaned_data["day"], time(0))
+
             self.cleaned_data["start_time"] = day + timedelta(
                 seconds=self.cleaned_data["start_time_delta"]
             )
@@ -338,11 +339,11 @@ class MultipleOccurrenceForm(forms.Form):
 
         return self.cleaned_data
 
-    def save(self, event):
+    def save(self, event: Event):
         if self.cleaned_data["repeats"] == "count" and self.cleaned_data["count"] == 1:
             params = {}
         else:
-            params = self._build_rrule_params()
+            params = self._build_rrule_params(self.cleaned_data)
 
         event.add_occurrences(
             self.cleaned_data["start_time"], self.cleaned_data["end_time"], **params
@@ -350,9 +351,8 @@ class MultipleOccurrenceForm(forms.Form):
 
         return event
 
-    def _build_rrule_params(self):
+    def _build_rrule_params(self, data):
         iso = ISO_WEEKDAYS_MAP
-        data = self.cleaned_data
         params = dict(freq=data["freq"], interval=data["interval"] or 1)
 
         if data["repeats"] == "until":

@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import pytz
 from dateutil import rrule
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
@@ -100,12 +101,15 @@ class Event(models.Model):
         count = rrule_params.get("count")
         until = rrule_params.get("until")
         if not (count or until):
+            start_time = pytz.utc.localize(start_time)
+            end_time = pytz.utc.localize(end_time)
             self.occurrence_set.create(start_time=start_time, end_time=end_time)
         else:
             rrule_params.setdefault("freq", rrule.DAILY)
             delta = end_time - start_time
             occurrences = []
             for ev in rrule.rrule(dtstart=start_time, **rrule_params):
+                ev = ev.replace(tzinfo=pytz.UTC)
                 occurrences.append(
                     Occurrence(start_time=ev, end_time=ev + delta, event=self)
                 )
@@ -208,6 +212,12 @@ class Occurrence(models.Model):
         return self.event.event_type
 
 
+class EventGroup(models.Model):
+    name = models.CharField(max_length=128)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    timezone = TimeZoneField()
+
+
 def create_event(
     title,
     event_type,
@@ -263,9 +273,3 @@ def create_event(
     end_time = end_time or (start_time + jivetime_settings.DEFAULT_OCCURRENCE_DURATION)
     event.add_occurrences(start_time, end_time, **rrule_params)
     return event
-
-
-class EventGroup(models.Model):
-    name = models.CharField(max_length=128)
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    timezone = TimeZoneField()

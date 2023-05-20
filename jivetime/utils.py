@@ -5,6 +5,8 @@ import calendar
 from copy import copy
 from datetime import date, datetime, time, timedelta, tzinfo
 
+import pytz
+
 from .conf import jivetime_settings
 from .models import Occurrence
 
@@ -22,7 +24,6 @@ def month_boundaries(dt=None):
 
 
 def create_timeslot_table(
-    timezone: tzinfo,
     dt: datetime,
     start_time: time = jivetime_settings.TIMESLOT_START_TIME,
     end_time_delta: timedelta = jivetime_settings.TIMESLOT_END_TIME_DURATION,
@@ -48,9 +49,7 @@ def create_timeslot_table(
       handle the custom output via its __unicode__ method.
 
     """
-    start_time = start_time.replace(tzinfo=timezone)
-
-    dtstart = datetime.combine(dt.date(), start_time)
+    dtstart = datetime.combine(dt.date(), start_time, tzinfo=pytz.UTC)
     dtend = dtstart + end_time_delta
 
     items = Occurrence.objects.daily_occurrences(dt).select_related("event")
@@ -64,8 +63,6 @@ def create_timeslot_table(
 
     # fill the timeslot buckets with occurrence proxies
     for item in sorted(items):
-        item.end_time = item.end_time.replace(tzinfo=timezone)
-        item.start_time = item.start_time.replace(tzinfo=timezone)
         if item.end_time <= dtstart:
             # this item began before the start of our schedule constraints
             continue

@@ -1,69 +1,66 @@
 {% extends "base.html" %}
-{% load tz %}
 
 {% block title %}Daily View{% endblock %}
 
 {% block content %}
 
-    {% timezone group.timezone %}
 
-        <div class="text-left">
+    <div class="text-left">
 
-            {% include "jivetime/include/menu_scope.html" %}
+        {% include "jivetime/include/menu_scope.html" %}
 
-            <div class="jive-btn-group pl-10">
-                <a class="jive-btn"
-                   href="{% url 'jivetime:calendar-day' group.id prev_day.year prev_day.month prev_day.day %}">
-                    &larr; {{ prev_day|date:"d.m.Y" }}
-                </a>
+        <div class="jive-btn-group pl-10">
+            <a class="jive-btn"
+               href="{% url 'jivetime:calendar-day' group.id prev_day.year prev_day.month prev_day.day %}">
+                &larr; {{ prev_day|date:"d.m.Y" }}
+            </a>
 
-                <form action="{% url 'jivetime:calendar-year' group.id day.year %}" method="post"
-                      class="jive-btn-group px-2">
-                    {% csrf_token %}
-                    <input type="date" name="date" value="{{ day|date:"Y-m-d" }}"/>
-                    <input type="submit" name="_goto" value="Go to day" class="jive-btn"/>
-                </form>
+            <form action="{% url 'jivetime:calendar-year' group.id day.year %}" method="post"
+                  class="jive-btn-group px-2">
+                {% csrf_token %}
+                <input type="date" name="date" value="{{ day|date:"Y-m-d" }}"/>
+                <input type="submit" name="_goto" value="Go to day" class="jive-btn"/>
+            </form>
 
-                <a class="jive-btn"
-                   href="{% url 'jivetime:calendar-day' group.id next_day.year next_day.month next_day.day %}">
-                    {{ next_day|date:"d.m.Y" }} &rarr;
-                </a>
-            </div>
-
+            <a class="jive-btn"
+               href="{% url 'jivetime:calendar-day' group.id next_day.year next_day.month next_day.day %}">
+                {{ next_day|date:"d.m.Y" }} &rarr;
+            </a>
         </div>
 
-        <table class="jive-table jive-table-zebra jive-table-normal w-full">
-            <thead>
-            <tr>
-                <th class="center">Time</th>
-                <th>{{ group.name }}</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for tm,cells in timeslots %}
-                <tr class="even:bg-gray-100">
-                    <th class="center">
-                        <a class="jive-btn jive-btn-sm font-mono"
-                           href="{% url 'jivetime:event-add' group.id %}?dtstart={{ tm|date:"Y-m-d\TH:i" }}">
-                            {{ tm|date:"H:i" }}
-                        </a>
-                    </th>
+    </div>
 
-                    {% for occ in cells %}
-                        <td>
-                            {% if occ %}
-                                <a class="border bg-primary rounded-lg hover:bg-primary-focus
+    <table class="jive-table jive-table-zebra jive-table-normal w-full">
+        <thead>
+        <tr>
+            <th class="center">Time</th>
+            <th>{{ group.name }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for tm,cells in timeslots %}
+            <tr class="even:bg-gray-100">
+                <th class="center">
+                    <a class="jive-btn jive-btn-sm font-mono"
+                       href="{% url 'jivetime:event-add' group.id %}?dtstart={{ tm|date:"Y-m-d\TH:i" }}">
+                        {{ tm|date:"H:i" }}
+                    </a>
+                </th>
+
+                {% for occ in cells %}
+                    <td>
+                        {% if occ %}
+                            <a class="border bg-primary rounded-lg hover:bg-primary-focus
                                 text-center text-primary-content border-primary-focus block py-1"
-                                   href="{{ occ.get_absolute_url }}">
-                                    {{ occ.title }}
-                                </a>
-                            {% endif %}
-                        </td>
-                    {% endfor %}
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+                               href="{{ occ.get_absolute_url }}">
+                                {{ occ.title }}
+                            </a>
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 
-    {% endtimezone %}
 {% endblock %}

@@ -5,9 +5,11 @@ from datetime import date, datetime, timedelta
 from enum import Enum
 from typing import List, Tuple
 
+import pytz
 from dateutil import parser
 from django import http
 from django.apps import apps
+from django.contrib import messages
 from django.db import models
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -17,7 +19,7 @@ from django.views.generic import CreateView
 
 from . import forms, utils
 from .conf import jivetime_settings
-from .forms import WEEKDAY_SHORT
+from .forms import WEEKDAY_SHORT, EventForm, MultipleOccurrenceForm
 from .models import Event, Occurrence
 
 if jivetime_settings.CALENDAR_FIRST_WEEKDAY is not None:
@@ -78,8 +80,9 @@ def event_view(
     event = get_object_or_404(Event, pk=int(pk), group_id=int(gid))
     group = event.group
     recurrence_form = ReccurrenceFormClass(
-        initial={"dtstart": datetime.now(tz=group.timezone)}
+        initial={"dtstart": datetime.now()},
     )
+
     event_form = EventFormClass(instance=event)
     if request.method == "POST":
         if "_update" in request.POST:
@@ -91,6 +94,10 @@ def event_view(
             recurrence_form = ReccurrenceFormClass(request.POST)
             if recurrence_form.is_valid():
                 recurrence_form.save(event)
+
+                messages.add_message(
+                    request, messages.SUCCESS, "Occurrence added successfully."
+                )
                 return http.HttpResponseRedirect(request.path)
         elif "_delete" in request.POST:
             event.delete()
@@ -101,7 +108,7 @@ def event_view(
             return http.HttpResponseBadRequest("Bad Request")
 
     occurrences = event.occurrence_set.all()
-    nav_date = datetime.now(tz=group.timezone)
+    nav_date = datetime.now()
     if occurrences:
         nav_date = occurrences[0].start_time.date()
 
@@ -180,13 +187,16 @@ class EventAddView(CreateView):
     def get_form_class(self):
         return EventFormClass
 
+    def get_form_class_recc(self):
+        return ReccurrenceFormClass
+
     def dispatch(self, request, *args, **kwargs):
         self.group = get_event_group(self.kwargs["gid"])
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         event_form = self.get_form()
-        recurrence_form = ReccurrenceFormClass(request.POST)
+        recurrence_form = self.get_form_class_recc()(request.POST)
 
         if event_form.is_valid() and recurrence_form.is_valid():
             event = event_form.save(commit=False)
@@ -204,7 +214,7 @@ class EventAddView(CreateView):
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
 
-        dtstart = datetime.now(tz=self.group.timezone)
+        dtstart = datetime.now(tz=self.group.timezone).replace(tzinfo=pytz.UTC)
         if "dtstart" in self.request.GET:
             try:
                 dtstart = parser.parse(self.request.GET["dtstart"])
@@ -213,12 +223,12 @@ class EventAddView(CreateView):
 
         start_time = int(dtstart.time().hour * 3600 + dtstart.minute * 60)
         data["group"] = self.group
-        data["recurrence_form"] = ReccurrenceFormClass(
+        data["recurrence_form"] = self.get_form_class_recc()(
             initial={
                 "start_time_delta": start_time,
                 "end_time_delta": start_time + 3600,
                 "day": dtstart.date(),
-            }
+            },
         )
         return data
 
@@ -251,7 +261,7 @@ def _datetime_view(request, template: str, group, dt: datetime, **params):
             "day": dt,
             "next_day": dt + timedelta(days=+1),
             "prev_day": dt + timedelta(days=-1),
-            "timeslots": utils.create_timeslot_table(group.timezone, dt, **params),
+            "timeslots": utils.create_timeslot_table(dt, **params),
             "scope_id": ScopeEnum.DAY,
             "scope_menu": get_scope_menu(group.id, dt),
         },
@@ -272,7 +282,7 @@ def day_view(
 
     """
     group = get_event_group(gid)
-    dt = datetime(int(year), int(month), int(day), tzinfo=group.timezone)
+    dt = datetime(int(year), int(month), int(day))  # , tzinfo=group.timezone)
     return _datetime_view(request, template, group, dt, **params)
 
 
@@ -282,7 +292,7 @@ def today_view(request, gid: int, template="jivetime/daily_view.html", **params)
 
     """
     group = get_event_group(gid)
-    dt = datetime.now(tz=group.timezone)
+    dt = datetime.now(tz=group.timezone).replace(tzinfo=None)
     return _datetime_view(request, template, group, dt, **params)
 
 
