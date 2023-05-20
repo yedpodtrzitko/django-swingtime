@@ -5,12 +5,10 @@ from datetime import date, datetime, time, timedelta
 
 from dateutil import rrule
 from django import forms
-from django.apps import apps
 from django.forms.utils import to_current_timezone
 from django.forms.widgets import SelectDateWidget
 from django.utils.translation import gettext_lazy as _
 
-from . import utils
 from .conf import jivetime_settings
 from .models import Event, Occurrence
 
@@ -156,7 +154,7 @@ def timeslot_offset_options(
     delta = (dtstart - dt).total_seconds()
     seconds = interval.total_seconds()
     while dtstart <= dtend:
-        options.append((delta, dtstart.strftime(fmt)))
+        options.append((int(delta), dtstart.strftime(fmt)))
         dtstart += interval
         delta += seconds
 

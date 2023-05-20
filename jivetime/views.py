@@ -13,6 +13,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.module_loading import import_string
 from django.utils.translation import gettext_lazy as _
+from django.views.generic import CreateView
 
 from . import forms, utils
 from .conf import jivetime_settings
@@ -21,6 +22,8 @@ from .models import Event, Occurrence
 
 if jivetime_settings.CALENDAR_FIRST_WEEKDAY is not None:
     calendar.setfirstweekday(jivetime_settings.CALENDAR_FIRST_WEEKDAY)
+
+logger = logging.getLogger(__name__)
 
 
 def load_config_form(form_class):
@@ -135,7 +138,6 @@ def occurrence_view(
     """
     occurrence = get_object_or_404(Occurrence, pk=pk, event_id=event_pk)
     group = occurrence.event.group
-    assert group.id == int(gid)
 
     if request.method == "POST":
         if "_delete" in request.POST:
@@ -171,60 +173,54 @@ def occurrence_view(
     )
 
 
-def add_event(
-    request,
-    gid: int,
-    template="jivetime/add_event.html",
-):
-    """
-    Add a new ``Event`` instance and 1 or more associated ``Occurrence``s.
+class EventAddView(CreateView):
+    model = Event
+    template_name = "jivetime/add_event.html"
 
-    Context parameters:
+    def get_form_class(self):
+        return EventFormClass
 
-    ``dtstart``
-        a datetime.datetime object representing the GET request value if present,
-        otherwise None
+    def dispatch(self, request, *args, **kwargs):
+        self.group = get_event_group(self.kwargs["gid"])
+        return super().dispatch(request, *args, **kwargs)
 
-    ``event_form``
-        a form object for updating the event
-
-    ``recurrence_form``
-        a form object for adding occurrences
-
-    """
-    group = get_event_group(gid)
-    event_form = EventFormClass(initial=dict(group=group.id))
-    dtstart = datetime.now(tz=group.timezone)
-
-    if request.method == "POST":
-        event_form = EventFormClass(request.POST)
+    def post(self, request, *args, **kwargs):
+        event_form = self.get_form()
         recurrence_form = ReccurrenceFormClass(request.POST)
+
         if event_form.is_valid() and recurrence_form.is_valid():
             event = event_form.save(commit=False)
-            event.group = group
+            event.group = self.group
             event.save()
+            self.object = event
             recurrence_form.save(event)
-            return http.HttpResponseRedirect(event.get_absolute_url())
+            return http.HttpResponseRedirect(self.get_success_url())
 
-    else:
-        if "dtstart" in request.GET:
+        return super().post(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return reverse("jivetime:event-detail", args=[self.group.id, self.object.pk])
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+
+        dtstart = datetime.now(tz=self.group.timezone)
+        if "dtstart" in self.request.GET:
             try:
-                dtstart = parser.parse(request.GET["dtstart"])
-            except (TypeError, ValueError) as e:
-                # TODO: A badly formatted date is passed to add_event
-                logging.warning(e)
-        recurrence_form = ReccurrenceFormClass(initial={"dtstart": dtstart})
+                dtstart = parser.parse(self.request.GET["dtstart"])
+            except Exception:
+                raise
 
-    return render(
-        request,
-        template,
-        {
-            "group": group,
-            "dtstart": dtstart,
-            "event_form": event_form,
-            "recurrence_form": recurrence_form,
-        },
-    )
+        start_time = int(dtstart.time().hour * 3600 + dtstart.minute * 60)
+        data["group"] = self.group
+        data["recurrence_form"] = ReccurrenceFormClass(
+            initial={
+                "start_time_delta": start_time,
+                "end_time_delta": start_time + 3600,
+                "day": dtstart.date(),
+            }
+        )
+        return data
 
 
 def _datetime_view(request, template: str, group, dt: datetime, **params):
@@ -269,19 +265,13 @@ def day_view(
     month: int,
     day: int,
     template="jivetime/daily_view.html",
-    **params
+    **params,
 ):
     """
     See documentation for function``_datetime_view``.
 
     """
     group = get_event_group(gid)
-    if request.method == "POST" and "_goto" in request.POST:
-        dt = datetime.strptime(request.POST.get("date"), "%Y-%m-%d")
-        return redirect(
-            reverse("jivetime:calendar-day", args=[group.id, dt.year, dt.month, dt.day])
-        )
-
     dt = datetime(int(year), int(month), int(day), tzinfo=group.timezone)
     return _datetime_view(request, template, group, dt, **params)
 
@@ -318,10 +308,27 @@ def year_view(request, gid: int, year: int, template="jivetime/yearly_view.html"
 
     """
     group = get_event_group(gid)
-    if request.method == "POST" and request.POST.get("date"):
-        sent = parser.parse(request.POST["date"])
-        year = sent.year
-        return redirect(reverse("jivetime:calendar-day", args=[group.id, year]))
+    if request.method == "POST" and "_goto" in request.POST:
+        dt = datetime.strptime(request.POST.get("date"), "%Y-%m-%d")
+
+        scope = request.POST.get("_scope")
+        if scope == "calendar-day":
+            args = [group.id, dt.year, dt.month, dt.day]
+        elif scope == "calendar-year":
+            args = [
+                group.id,
+                dt.year,
+            ]
+        else:
+            scope = "calendar-month"
+            args = [
+                group.id,
+                dt.year,
+                dt.month,
+            ]
+
+        print("red", scope, args)
+        return redirect(reverse(f"jivetime:{scope}", args=args))
 
     year = int(year)
     occurrences = Occurrence.objects.filter(
@@ -369,7 +376,7 @@ def get_scope_menu(gid: int, dt: datetime) -> List[Tuple[str, str, str]]:
         (
             ScopeEnum.MONTH,
             reverse("jivetime:calendar-month", args=[gid, dt.year, dt.month]),
-            _("Montly View"),
+            _("Monthly View"),
         ),
         (
             ScopeEnum.DAY,
@@ -387,11 +394,10 @@ def month_current(request, gid: int):
     )
 
 
-def get_event_group(group_id):
+def get_event_group(group_id, key_type=int):
     model_path = jivetime_settings.EVENT_GROUP_MODEL
-    print("model path", model_path, model_path.split("."))
     ModelClass = apps.get_model(*model_path.split("."))
-    return get_object_or_404(ModelClass, pk=group_id)
+    return get_object_or_404(ModelClass, pk=key_type(group_id))
 
 
 def month_view(

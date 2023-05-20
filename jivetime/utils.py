@@ -2,6 +2,7 @@
 Common features and functions for jivetime
 """
 import calendar
+from copy import copy
 from datetime import date, datetime, time, timedelta, tzinfo
 
 from .conf import jivetime_settings
@@ -111,11 +112,11 @@ def create_timeslot_table(
 
     # create the chronological grid layout
     table = []
+
     for rowkey in sorted(timeslots.keys()):
         cols = empty_columns[:]
         for colkey in timeslots[rowkey]:
             cols[colkey] = timeslots[rowkey][colkey]
 
         table.append((rowkey, cols))
-
     return table

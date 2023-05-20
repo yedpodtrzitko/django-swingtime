@@ -4,7 +4,7 @@
 {% block content %}
     <h3 class="jive-title">Add Event</h3>
 
-    {{ event_form.non_field_errors }}
+    {{ form.non_field_errors }}
     {{ recurring_form.non_field_errors }}
     {% if event_form.errors or recurrence_form.errors %}
         <p class="form-errors">Please fix errors in the form.</p>
@@ -13,7 +13,7 @@
     <form method="post" action="">
         {% csrf_token %}
         <table>
-            {{ event_form.as_table }}
+            {{ form.as_table }}
             {% include "jivetime/recurring_form_part.html" %}
         </table>
 

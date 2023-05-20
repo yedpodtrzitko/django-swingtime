@@ -2,7 +2,7 @@
 {% block title %}Event: {{ event }}{% endblock %}
 {% block content %}
 
-    <div class="text-center">
+    <div class="text-left">
         {% include "jivetime/include/menu_scope.html" %}
     </div>
 
@@ -10,6 +10,13 @@
 
     <form action="." method="post">
         {% csrf_token %}
+        <div class="my-2 border rounded bg-gray-50 p-4">
+            <div class="py-2">Remove Event and all its occurrences</div>
+            <input type="submit" name="_delete" value="Delete Event"
+                   class="jive-btn-error jive-btn"/>
+        </div>
+
+
         <div class="border rounded bg-gray-50 p-4">
             <table>
                 {{ event_form.as_table }}
@@ -17,11 +24,6 @@
             <div class="h-4"></div>
             <input type="submit" name="_update" value="Update Details"
                    class="jive-btn jive-btn-primary"/>
-        </div>
-        <div class="my-2 border rounded bg-gray-50 p-4">
-            <div class="py-2">Remove Event and all its occurrences</div>
-            <input type="submit" name="_delete" value="Delete Event"
-                   class="jive-btn-danger jive-btn"/>
         </div>
 
 
@@ -33,7 +35,7 @@
 
     <div class="max-h-56 overflow-y-scroll border">
         {% if occurrences %}
-            <table class="table-auto w-full">
+            <table class="jive-table-zebra jive-table w-full">
                 <thead>
                 <tr class="font-bold jive-accent">
                     <td>Detail</td>
@@ -45,7 +47,9 @@
                 {% for o in occurrences %}
                     <tr class="even:bg-gray-100">
                         <td class="font-bold">
-                            <a href="{% url 'jivetime:event-occurrence' group.id event.id o.id %}">
+                            <a
+                                    class="jive-btn jive-btn-sm"
+                                    href="{% url 'jivetime:event-occurrence' group.id event.id o.id %}">
                                 See Detail
                             </a>
                         </td>

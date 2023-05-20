@@ -3,7 +3,7 @@
 
 {% block content %}
 
-    <div class="text-center">
+    <div class="text-left block mb-10">
 
         {% include "jivetime/include/menu_scope.html" %}
 
@@ -13,11 +13,11 @@
                title="Previous Year">&larr;
             </a>
 
-            <form action="." method="post" class="jive-btn-group px-2">
-                    {% csrf_token %}
-                    <input type="date" name="date" value="{{ today|date:"Y-m-d" }}"/>
-                    <input type="submit" name="_goto" value="Go to selected" class="jive-btn"/>
-                </form>
+            <form action="{% url 'jivetime:calendar-year' group.id today.year %}" method="post" class="jive-btn-group px-2">
+                {% csrf_token %}
+                <input type="date" name="date" value="{{ today|date:"Y-m-d" }}"/>
+                <input type="submit" name="_goto" value="Go to year" class="jive-btn"/>
+            </form>
 
             <a class="jive-btn"
                href="{% url 'jivetime:calendar-year' group.id next_year %}"
@@ -26,47 +26,53 @@
         </div>
 
     </div>
+    <div>
 
-    {% if by_month %}
-        <table class="table-auto w-full">
-            <thead class="bg-blue-100 py-2">
-            <tr class="text-center">
-                <th>Month</th>
-                <th>Event Title</th>
-                <th>Event Occurrence</th>
-                <th>Start</th>
-                <th>End</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for dt,occurrences in by_month %}
-                <tr class="hover:bg-gray-200 border-t-2">
-                    <th rowspan="{{ occurrences|length }}" class="bg-white hover:bg-gray-200">
-                        <a class="h-full block" href="{% url 'jivetime:calendar-month' group.id dt.year dt.month %}">
-                            {{ dt|date:"F" }}
-                        </a>
-                    </th>
-                    {% for o in occurrences %}
-                        <td>
-                            <a class="block font-bold"
-                               href="{{ o.get_absolute_url }}">{{ o.title }}</a>
-                        </td>
-                        <td>
-                            <a href="{% url 'jivetime:calendar-day' group.id o.start_time.year o.start_time.month o.start_time.day %}">
-                                {{ o.start_time|date:"l, M jS" }}
+        {% if by_month %}
+
+            <table class="jive-table jive-table-zebra w-full">
+                <thead class="bg-blue-100 py-2">
+                <tr class="text-center">
+                    <th>Month</th>
+                    <th>Event Title</th>
+                    <th>Event Occurrence</th>
+                    <th>Start</th>
+                    <th>End</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for dt,occurrences in by_month %}
+                    <tr class="hover:bg-gray-200 border-t-2">
+                        <th rowspan="{{ occurrences|length }}" class="bg-white hover:bg-gray-200">
+                            <a class="h-full block"
+                               href="{% url 'jivetime:calendar-month' group.id dt.year dt.month %}">
+                                {{ dt|date:"F" }}
                             </a>
-                        </td>
-                        <td>{{ o.start_time|date:"P" }}</td>
-                        <td>{{ o.end_time|date:"P" }}</td>
-                        </tr>
-                        {% if not forloop.last %}
-                            <tr class="even:bg-gray-100 hover:bg-gray-200">
-                        {% endif %}
-                    {% endfor %}
-            {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>No events occurring in {{ year }}</p>
-    {% endif %}
+                        </th>
+                        {% for o in occurrences %}
+                            <td>
+                                <a class="block font-bold"
+                                   href="{{ o.get_absolute_url }}">{{ o.title }}</a>
+                            </td>
+                            <td>
+                                <a href="{% url 'jivetime:calendar-day' group.id o.start_time.year o.start_time.month o.start_time.day %}">
+                                    {{ o.start_time|date:"l, M jS" }}
+                                </a>
+                            </td>
+                            <td>{{ o.start_time|date:"P" }}</td>
+                            <td>{{ o.end_time|date:"P" }}</td>
+                            </tr>
+                            {% if not forloop.last %}
+                                <tr class="even:bg-gray-100 hover:bg-gray-200">
+                            {% endif %}
+                        {% endfor %}
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No events occurring in {{ year }}</p>
+        {% endif %}
+
+    </div>
+
 {% endblock %}

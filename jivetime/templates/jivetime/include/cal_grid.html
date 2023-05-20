@@ -1,22 +1,24 @@
 <div class="w-full grid grid-cols-7">
     {% for week_day in week_days %}
-        <div class="jive-accent font-bold text-center">{{ week_day }}</div>
+        <div class="bg-primary py-2 text-primary-content jive-primary-content font-bold text-center">{{ week_day }}</div>
     {% endfor %}
 
     {% for row in calendar_data %}
         {% for day,items in row %}
-            <div class="border{% if day == today.day %} today{% endif %}">
+            <div class="border">
                 {% if day %}
                     <a title="see day detail"
-                       class="block border bg-gray-300 hover:bg-gray-400 p-2 text-center font-bold"
+                       class="block bg-secondary text-secondary-content text-center py-2"
                        href="{% url 'jivetime:calendar-day' group.id this_month.year this_month.month day %}">
                         {{ day }}
                     </a>
                     {% for item in items %}
                         <a href="{{ item.get_absolute_url }}"
-                           class="block border p-1 m-1 bg-gray-100 rounded hover:bg-gray-200">
-                            <span class="event-times">{{ item.start_time|time }}</span>
-                            {{ item.title }}
+                           class="border border-secondary rounded block p-1 m-1 text-secondary text-left hover:shadow">
+                            <span class="jive-badge">{{ item.start_time|time:"H:i"  }}</span>
+                            <span>
+                                {{ item.title }}
+                            </span>
                         </a>
                         {% empty %}
                         <div class="h-20"></div>

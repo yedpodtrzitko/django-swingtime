@@ -30,7 +30,9 @@ urlpatterns = [
         name="calendar-day",
     ),
     re_path(r"^events/(?P<gid>\d+)/$", views.event_listing, name="event-list"),
-    re_path(r"^events/(?P<gid>\d+)/add/$", views.add_event, name="event-add"),
+    re_path(
+        r"^events/(?P<gid>\d+)/add/$", views.EventAddView.as_view(), name="event-add"
+    ),
     re_path(r"^events/(\d+)/detail/(\d+)/$", views.event_view, name="event-detail"),
     re_path(
         r"^events/(\d+)/detail/(\d+)/(\d+)/$",
