@@ -1,7 +1,6 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pytest
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 
@@ -52,8 +51,8 @@ def occurrence(work_type, group_default):
     )
     return Occurrence.objects.create(
         event=e,
-        start_time=datetime(2018, 3, 18, 16, 00),
-        end_time=datetime(2018, 3, 18, 16, 45),
+        start_time=datetime(2018, 3, 18, 16, 00, tzinfo=timezone.utc),
+        end_time=datetime(2018, 3, 18, 16, 45, tzinfo=timezone.utc),
     )
 
 
@@ -65,50 +64,50 @@ def events(play_type, work_type, group_default):
     e = Event.objects.create(event_type=play_type, title="bravo", group=g)
     Occurrence.objects.create(
         event=e,
-        start_time=datetime(2008, 12, 11, 16, 00),
-        end_time=datetime(2008, 12, 11, 16, 45),
+        start_time=datetime(2008, 12, 11, 16, 00, tzinfo=timezone.utc),
+        end_time=datetime(2008, 12, 11, 16, 45, tzinfo=timezone.utc),
     )
 
     e = Event.objects.create(event_type=work_type, title="echo", group=g)
     Occurrence.objects.create(
         event=e,
-        start_time=datetime(2008, 12, 11, 17, 15),
-        end_time=datetime(2008, 12, 11, 18, 00),
+        start_time=datetime(2008, 12, 11, 17, 15, tzinfo=timezone.utc),
+        end_time=datetime(2008, 12, 11, 18, 00, tzinfo=timezone.utc),
     )
 
     e = Event.objects.create(event_type=play_type, title="charlie", group=g)
     Occurrence.objects.create(
         event=e,
-        start_time=datetime(2008, 12, 11, 16, 15),
-        end_time=datetime(2008, 12, 11, 17, 00),
+        start_time=datetime(2008, 12, 11, 16, 15, tzinfo=timezone.utc),
+        end_time=datetime(2008, 12, 11, 17, 00, tzinfo=timezone.utc),
     )
 
     e = Event.objects.create(event_type=work_type, title="foxtrot", group=g)
     Occurrence.objects.create(
         event=e,
-        start_time=datetime(2008, 12, 11, 16, 00),
-        end_time=datetime(2008, 12, 11, 16, 45),
+        start_time=datetime(2008, 12, 11, 16, 00, tzinfo=timezone.utc),
+        end_time=datetime(2008, 12, 11, 16, 45, tzinfo=timezone.utc),
     )
 
     e = Event.objects.create(event_type=play_type, title="alpha", group=g)
     Occurrence.objects.create(
         event=e,
-        start_time=datetime(2008, 12, 11, 15, 30),
-        end_time=datetime(2008, 12, 11, 17, 45),
+        start_time=datetime(2008, 12, 11, 15, 30, tzinfo=timezone.utc),
+        end_time=datetime(2008, 12, 11, 17, 45, tzinfo=timezone.utc),
     )
 
     e = Event.objects.create(event_type=work_type, title="zelda", group=g)
     Occurrence.objects.create(
         event=e,
-        start_time=datetime(2008, 12, 11, 15, 15),
-        end_time=datetime(2008, 12, 11, 15, 45),
+        start_time=datetime(2008, 12, 11, 15, 15, tzinfo=timezone.utc),
+        end_time=datetime(2008, 12, 11, 15, 45, tzinfo=timezone.utc),
     )
 
     e = Event.objects.create(event_type=play_type, title="delta", group=g)
     Occurrence.objects.create(
         event=e,
-        start_time=datetime(2008, 12, 11, 16, 30),
-        end_time=datetime(2008, 12, 11, 17, 15),
+        start_time=datetime(2008, 12, 11, 16, 30, tzinfo=timezone.utc),
+        end_time=datetime(2008, 12, 11, 17, 15, tzinfo=timezone.utc),
     )
 
     return Event.objects.all()

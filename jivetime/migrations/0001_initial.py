@@ -5,6 +5,8 @@ import timezone_field.fields
 from django.conf import settings
 from django.db import migrations, models
 
+from jivetime.conf import jivetime_settings
+
 
 class Migration(migrations.Migration):
     initial = True
@@ -12,7 +14,6 @@ class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("contenttypes", "0002_remove_content_type_name"),
-        ("vendor", "0002_alter_vendor_default_url"),
     ]
 
     operations = [
@@ -179,7 +180,8 @@ class Migration(migrations.Migration):
             model_name="event",
             name="group",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to="vendor.vendor"
+                on_delete=django.db.models.deletion.CASCADE,
+                to=jivetime_settings.EVENT_GROUP_MODEL,
             ),
         ),
     ]

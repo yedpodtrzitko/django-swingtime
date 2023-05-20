@@ -19,13 +19,19 @@ from django.views.generic import CreateView
 
 from . import forms, utils
 from .conf import jivetime_settings
-from .forms import WEEKDAY_SHORT, EventForm, MultipleOccurrenceForm
+from .forms import WEEKDAY_SHORT
 from .models import Event, Occurrence
 
 if jivetime_settings.CALENDAR_FIRST_WEEKDAY is not None:
     calendar.setfirstweekday(jivetime_settings.CALENDAR_FIRST_WEEKDAY)
 
 logger = logging.getLogger(__name__)
+
+
+class ScopeEnum(str, Enum):
+    YEAR = "year"
+    MONTH = "month"
+    DAY = "day"
 
 
 def load_config_form(form_class):
@@ -218,8 +224,8 @@ class EventAddView(CreateView):
         if "dtstart" in self.request.GET:
             try:
                 dtstart = parser.parse(self.request.GET["dtstart"])
-            except Exception:
-                raise
+            except parser.ParserError:
+                logger.error("failed to parse dstart")
 
         start_time = int(dtstart.time().hour * 3600 + dtstart.minute * 60)
         data["group"] = self.group
@@ -337,20 +343,17 @@ def year_view(request, gid: int, year: int, template="jivetime/yearly_view.html"
                 dt.month,
             ]
 
-        print("red", scope, args)
         return redirect(reverse(f"jivetime:{scope}", args=args))
 
     year = int(year)
     occurrences = Occurrence.objects.filter(
-        models.Q(start_time__year=year) | models.Q(end_time__year=year)
+        models.Q(start_time__year=year) | models.Q(end_time__year=year),
+        event__group_id=group.id,
     )
 
-    def group_key(o):
-        return datetime(
-            year,
-            o.start_time.month if o.start_time.year == year else o.end_time.month,
-            1,
-        )
+    by_month = {date(year, idx, 1): [] for idx in range(1, 13)}
+    for o in occurrences:
+        by_month[date(o.start_time.year, o.start_time.month, 1)].append(o)
 
     return render(
         request,
@@ -359,21 +362,13 @@ def year_view(request, gid: int, year: int, template="jivetime/yearly_view.html"
             "today": date(year, 1, 1),
             "group": group,
             "year": year,
-            "by_month": [
-                (dt, list(o)) for dt, o in itertools.groupby(occurrences, group_key)
-            ],
+            "by_month": by_month,
             "next_year": year + 1,
             "last_year": year - 1,
             "scope_menu": get_scope_menu(gid, datetime(year, 1, 1)),
             "scope_id": ScopeEnum.YEAR,
         },
     )
-
-
-class ScopeEnum(str, Enum):
-    YEAR = "year"
-    MONTH = "month"
-    DAY = "day"
 
 
 def get_scope_menu(gid: int, dt: datetime) -> List[Tuple[str, str, str]]:
@@ -416,7 +411,6 @@ def month_view(
     year: int,
     month: int,
     template="jivetime/monthly_view.html",
-    queryset=None,
 ):
     """
     Render a traditional calendar grid view with temporal navigation variables.
@@ -448,14 +442,11 @@ def month_view(
     dtstart = datetime(year, month, 1)
     last_day = max(cal_data[-1])
 
-    # TODO Whether to include those occurrences that started in the previous
-    # month but end in this month?
-    queryset = (
-        queryset._clone()
-        if queryset is not None
-        else Occurrence.objects.select_related()
-    )
-    occurrences = queryset.filter(start_time__year=year, start_time__month=month)
+    occurrences = Occurrence.objects.filter(
+        start_time__year=year,
+        start_time__month=month,
+        event__group_id=group.id,
+    ).select_related()
 
     def start_day(o):
         return o.start_time.day

@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 import pytz
 from dateutil import rrule
@@ -138,7 +139,9 @@ class Event(models.Model):
 
 
 class OccurrenceManager(models.Manager):
-    def daily_occurrences(self, dt=None, event=None):
+    def daily_occurrences(
+        self, dt: Optional[datetime] = None, event: Optional[Event] = None
+    ):
         """
         Returns a queryset of for instances that have any overlap with a
         particular day.

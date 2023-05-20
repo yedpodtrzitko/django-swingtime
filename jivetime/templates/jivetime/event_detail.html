@@ -3,28 +3,44 @@
 {% block title %}Event: {{ event }}{% endblock %}
 {% block content %}
 
-    <div class="text-left">
+    <div class="text-left pb-10">
         {% include "jivetime/include/menu_scope.html" %}
     </div>
 
     <h3 class="jive-title">Event Details</h3>
 
     <form action="." method="post">
-        {% csrf_token %}
-        <div class="my-2 border rounded bg-gray-50 p-4">
-            <div class="py-2">Remove Event and all its occurrences</div>
-            <input type="submit" name="_delete" value="Delete Event"
-                   class="jive-btn-error jive-btn"/>
-        </div>
+        <div class="flex">
+
+            {% csrf_token %}
+            <div class="w-1/2 jive-card jive-card-bordered jive-card-normal m-4">
+                <div class="jive-card-body">
+                    <table>
+                        {{ event_form.as_table }}
+                    </table>
+                    <div class="card-actions justify-end text-center">
+                        <input type="submit" name="_update" value="Update Details"
+                               class="jive-btn jive-btn-primary"/>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="w-1/2 jive-card jive-card-bordered jive-card-normal m-4">
+                <div class="jive-card-body">
+
+                    <div class="jive-title">Remove this event and all its occurrences</div>
+
+                    <div class="card-actions justify-end text-center">
+
+                        <input type="submit" name="_delete" value="Delete Event"
+
+                               class="jive-btn-error jive-btn"/>
+                    </div>
+                </div>
 
 
-        <div class="border rounded bg-gray-50 p-4">
-            <table>
-                {{ event_form.as_table }}
-            </table>
-            <div class="h-4"></div>
-            <input type="submit" name="_update" value="Update Details"
-                   class="jive-btn jive-btn-primary"/>
+            </div>
         </div>
 
 
@@ -48,10 +64,9 @@
                 {% for o in occurrences %}
                     <tr class="even:bg-gray-100">
                         <td class="font-bold">
-                            <a
-                                    class="jive-btn jive-btn-sm"
-                                    href="{% url 'jivetime:event-occurrence' group.id event.id o.id %}">
-                                See Detail
+                            <a class="jive-btn jive-btn-primary jive-btn-sm"
+                               href="{% url 'jivetime:event-occurrence' group.id event.id o.id %}">
+                                See Details
                             </a>
                         </td>
                         <td>

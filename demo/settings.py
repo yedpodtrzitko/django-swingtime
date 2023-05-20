@@ -87,3 +87,5 @@ else:
     INSTALLED_APPS += [
         "django_extensions",
     ]
+
+USE_TZ = True

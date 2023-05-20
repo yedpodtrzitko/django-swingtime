@@ -66,7 +66,7 @@ expected_table_5 = """\
 class TestTable:
     @property
     def dt(self):
-        return datetime(2008, 12, 11)
+        return datetime(2008, 12, 11, tzinfo=timezone.utc)
 
     def table_as_string(self, table):
         timefmt = "| {:<5s} "
@@ -86,10 +86,9 @@ class TestTable:
     def _do_test(self, start, end, expect):
         start = time(*start, tzinfo=timezone.utc)
         dtstart = datetime.combine(self.dt, start)
-        etd = datetime.combine(self.dt, time(*end, tzinfo=timezone.utc)) - dtstart
+        etd = datetime.combine(self.dt, time(*end), tzinfo=timezone.utc) - dtstart
         table = utils.create_timeslot_table(
-            timezone.utc,
-            self.dt,
+            dt=self.dt,
             start_time=start,
             end_time_delta=etd,
         )
@@ -220,7 +219,7 @@ class TestCreation:
         )
         occs = list(e.occurrence_set.all())
         assert len(occs) == 7
-        assert str(occs[0]) == "Hello, world: 2008-01-01T00:00:00"
+        assert str(occs[0]) == "Hello, world: 2008-01-01T00:00:00+00:00"
         for i in range(7):
             o = occs[i]
             assert o.start_time.year == 2008 + i

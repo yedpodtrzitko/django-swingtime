@@ -5,7 +5,7 @@
 {% block content %}
 
 
-    <div class="text-left">
+    <div class="text-left pb-10">
 
         {% include "jivetime/include/menu_scope.html" %}
 
@@ -30,7 +30,7 @@
 
     </div>
 
-    <table class="jive-table jive-table-zebra jive-table-normal w-full">
+    <table class="jive-table jive-table-zebra jive-table-compact w-full">
         <thead>
         <tr>
             <th class="center">Time</th>
@@ -41,9 +41,9 @@
         {% for tm,cells in timeslots %}
             <tr class="even:bg-gray-100">
                 <th class="center">
-                    <a class="jive-btn jive-btn-sm font-mono"
+                    <a class="jive-btn jive-btn-primary jive-btn-sm font-mono"
                        href="{% url 'jivetime:event-add' group.id %}?dtstart={{ tm|date:"Y-m-d\TH:i" }}">
-                        {{ tm|date:"H:i" }}
+                        {{ tm|date:"H:i" }} ➕
                     </a>
                 </th>
 
